@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
+import { MobileNavigation } from "@/components/MobileNavigation";
 import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
@@ -26,8 +27,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full">
         <div className="flex min-h-screen bg-background">
-          <Sidebar />
+          <div className="hidden shrink-0 lg:block">
+            <Sidebar />
+          </div>
           <main className="h-screen min-w-0 flex-1 overflow-y-auto">
+            <MobileNavigation>
+              <Sidebar variant="drawer" />
+            </MobileNavigation>
             {children}
           </main>
         </div>
