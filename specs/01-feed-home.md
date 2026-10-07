@@ -10,7 +10,7 @@
 **In:**
 
 - Shell compartido de la aplicación con sidebar fija de 248px desde 1024px y drawer con hamburguesa por debajo de 1024px.
-- Topbar sticky solo en móvil, con botón hamburguesa y mini logo OpenDayCare.
+- Topbar fija y a ancho completo solo en móvil, con botón hamburguesa y mini logo OpenDayCare.
 - Drawer móvil superpuesto con backdrop; se cierra al tocar el backdrop o el botón de cierre.
 - Página `/` con encabezado de sala, acceso visual para crear publicación, divisor «PUBLICADO HOY» y los tres posts del mockup.
 - Tipografías Fredoka para títulos y Nunito para cuerpo, cargadas con `next/font/google` en lugar de Geist.
@@ -78,9 +78,9 @@ Los valores internos de `PostType` se mantienen en inglés. `postTypeLabels` pro
 
 1. Actualizar `app/layout.tsx` con Fredoka y Nunito mediante `next/font/google`, `lang="es"` y metadata OpenDayCare. Actualizar `app/globals.css` con la paleta del mockup, estilos base y scrollbar. Mantener Tailwind v4 por Turbopack, sin añadir PostCSS. Verificar con `npm run dev` que cargan el fondo y las fuentes.
 2. Crear `app/data/mock/feed.ts` con los tipos y el contenido exacto de sala y publicaciones del mockup. Verificar que el módulo importa sin errores.
-3. Crear `components/Sidebar.tsx` y montarlo desde `app/layout.tsx` alrededor del contenido. Implementar sidebar desktop de 248px con logo, CTA, navegación Feed activa y tarjeta de usuario. Mantener el scroll de contenido en `<main>`. Verificar visualmente la navegación en desktop.
+3. Crear `components/Sidebar.tsx` y montarlo desde `app/layout.tsx` alrededor del contenido. Implementar sidebar desktop de 248px con logo, CTA, navegación Feed activa y tarjeta de usuario. Mantener el scroll global en el documento para que la scrollbar ocupe toda la ventana. Verificar visualmente la navegación en desktop.
 4. Crear `components/PostCard.tsx` y reemplazar el contenido de `app/page.tsx` con encabezado, tarjeta para compartir, divisor y los tres posts tipados. Incluir badges, audiencia, contadores, enlaces visuales y placeholder de foto. Comparar la página con `references/pantallas/feed.dc.html`.
-5. Añadir el comportamiento móvil al shell: topbar sticky por debajo de 1024px, hamburguesa, drawer superpuesto y cierre por backdrop o botón. Verificar apertura y cierre en viewport de 375px.
+5. Añadir el comportamiento móvil al shell: topbar fija y a ancho completo por debajo de 1024px, hamburguesa, drawer superpuesto y cierre por backdrop o botón. Verificar apertura y cierre en viewport de 375px.
 6. Validar el resultado en desktop y móvil con capturas de Playwright, y ejecutar `npm run lint` y `npm run build`.
 
 ## Acceptance criteria
@@ -101,6 +101,7 @@ Los valores internos de `PostType` se mantienen en inglés. `postTypeLabels` pro
 - **Sí:** datos mock tipados en `app/data/mock/feed.ts`, según la estructura elegida.
 - **Sí:** `next/font/google` para Fredoka y Nunito; evita depender de una carga CDN en runtime.
 - **Sí:** drawer móvil por debajo de 1024px, superpuesto, con backdrop y topbar.
+- **Sí:** el documento controla el scroll global y la scrollbar se superpone a la topbar móvil de ancho completo.
 - **Sí:** SVG inline copiados del mockup; no se añade una dependencia de iconos.
 - **Sí:** enlaces sin pantalla funcional usan `href="#"` hasta que sus rutas se definan en otras specs.
 - **No:** rutas stub; quedan fuera del alcance de esta pantalla.

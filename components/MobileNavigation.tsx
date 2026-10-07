@@ -11,7 +11,7 @@ export function MobileNavigation({ children }: MobileNavigationProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-surface px-4 lg:hidden">
+      <header className="fixed left-0 top-0 z-40 flex h-16 w-screen items-center gap-3 border-b border-border bg-surface px-4 lg:hidden">
         <button
           type="button"
           aria-label="Abrir menú"
@@ -53,7 +53,7 @@ export function MobileNavigation({ children }: MobileNavigationProps) {
       </header>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
+        <div className="fixed inset-0 z-50 flex w-screen lg:hidden">
           <div
             id="mobile-navigation-drawer"
             className="w-[280px] max-w-[85vw] shrink-0 overflow-y-auto bg-surface shadow-[8px_0_24px_-12px_rgba(63,54,46,0.35)]"
