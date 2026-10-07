@@ -85,15 +85,15 @@ Los valores internos de `PostType` se mantienen en inglés. `postTypeLabels` pro
 
 ## Acceptance criteria
 
-- [ ] La ruta `/` muestra shell y feed con fondo `#F6ECDF`, tarjetas `#FFFDF9`, títulos Fredoka y texto Nunito.
-- [ ] En desktop, la sidebar mide 248px e incluye el CTA, Feed activo y perfil de Caro Giménez.
-- [ ] Se muestran los tres posts del mockup con etiqueta visible en español, audiencia y contadores correctos: 3/1, 5/2 y 8/0.
-- [ ] El post de actividad muestra el placeholder punteado con el texto «Foto · pintando con témperas».
-- [ ] Los enlaces a páginas aún no implementadas no producen errores 404.
-- [ ] Por debajo de 1024px, se oculta la sidebar fija y aparece la topbar con hamburguesa.
-- [ ] El drawer móvil se abre sobre el contenido y se cierra al tocar el backdrop o el botón de cierre.
-- [ ] `npm run lint` y `npm run build` terminan correctamente.
-- [ ] La consola del navegador no muestra errores al cargar `/` en desktop ni móvil.
+- [x] La ruta `/` muestra shell y feed con fondo `#F6ECDF`, tarjetas `#FFFDF9`, títulos Fredoka y texto Nunito.
+- [x] En desktop, la sidebar mide 248px e incluye el CTA, Feed activo y perfil de Caro Giménez.
+- [x] Se muestran los tres posts del mockup con etiqueta visible en español, audiencia y contadores correctos: 3/1, 5/2 y 8/0.
+- [x] El post de actividad muestra el placeholder punteado con el texto «Foto · pintando con témperas».
+- [x] Los enlaces a páginas aún no implementadas no producen errores 404.
+- [x] Por debajo de 1024px, se oculta la sidebar fija y aparece la topbar con hamburguesa.
+- [x] El drawer móvil se abre sobre el contenido y se cierra al tocar el backdrop o el botón de cierre.
+- [x] `npm run lint` y `npm run build` terminan correctamente.
+- [x] La consola del navegador no muestra errores al cargar `/` en desktop ni móvil.
 
 ## Decisions
 

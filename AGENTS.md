@@ -31,36 +31,43 @@ Before the final response, run one reporting pass. If candidates remain, from th
 
 ## Project
 
-OpenDaycare — daycare management app (feed, posts, children profiles, parent accounts). App Router in `app/`, no `src/` directory. Import alias `@/*` maps to the repo root.
+OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `@/*` maps to the repo root. UI copy is Spanish (Rioplatense); code identifiers are English. No auth or database — all data is typed static mocks in `app/data/mock/`. Only `/` (feed) is implemented; links to unbuilt screens use `href="#"` by design, don't "fix" them.
 
 ## Commands
 
-- Package manager is npm (`package-lock.json`) — don't use pnpm/yarn/bun.
+- npm only (`package-lock.json`) — don't use pnpm/yarn/bun.
 - `npm run dev` — dev server at http://localhost:3000 (Turbopack).
-- `npm run lint` — ESLint (flat config, `eslint-config-next`).
-- `npm run build` — production build; also the only script that typechecks. No test suite exists.
+- `npm run lint` — ESLint flat config; `references/**` is intentionally ignored.
+- `npm run build` — the only script that typechecks. There is no test suite.
 
-## Stack quirks
+## Stack quirks (Next 16)
 
-- Tailwind v4 is wired through Turbopack rules in `next.config.ts` (`@tailwindcss/turbopack`). There is no `postcss.config.*` — don't create one. Styles: `@import "tailwindcss"` + `@theme inline` tokens in `app/globals.css`.
-- `cacheComponents` and `partialPrefetching` are enabled in `next.config.ts`; they change data-fetching/caching semantics — check the bundled Next 16 docs (`node_modules/next/dist/docs/`) before writing server components that fetch data.
-- Next 16 typed route props: layouts/pages use generated types like `LayoutProps<"/">` (see `app/layout.tsx`).
+- Tailwind v4 runs through Turbopack rules in `next.config.ts` (`@tailwindcss/turbopack`). There is no `postcss.config.*` — don't create one. Styles: `@import "tailwindcss"` + `@theme inline` tokens in `app/globals.css`.
+- `cacheComponents` and `partialPrefetching` are enabled — caching/data-fetching semantics differ from older Next; check the bundled docs in `node_modules/next/dist/docs/` before writing components that fetch data.
+- Typed route props: layouts/pages take generated types like `LayoutProps<"/">` (see `app/layout.tsx`).
+
+## Design system
+
+- Fredoka headings (`font-heading` utility) + Nunito body, via `next/font/google`. Color tokens in `app/globals.css` map to Tailwind utilities (`bg-surface`, `bg-accent`, `text-muted`, …) — reuse them; no new colors, fonts, or icon libraries.
+- Icons are inline SVG copied from the mockups — don't add an icon dependency.
+- Shared shell in `app/layout.tsx`: fixed 248px `Sidebar` from `lg` (1024px) up, topbar + `MobileNavigation` drawer below. New screens render inside this shell — don't duplicate it.
+- Mock data keeps internal values in English (`PostType = "achievement" | …`); visible Spanish text comes from label maps (`postTypeLabels`).
 
 ## Design references
 
-- `references/pantallas/*.dc.html` — self-contained clickable HTML mockups (open directly in a browser; NOT part of the app build). They are the source of truth for each screen: layout, Spanish copy, colors, and fonts (Fredoka headings / Nunito body, warm palette — bg `#F6ECDF`, accent `#F2937A`).
-- `references/screenshots/*.png` — visual references of key screens.
-- Screen names are Spanish (`feed`, `ninos`, `resumen-dia`, `vincular-padre`, …) and map 1:1 to app features.
+- `references/pantallas/*.dc.html` — clickable HTML mockups, NOT part of the app build. Source of truth per screen: layout, Spanish copy, colors, fonts. Screen names map 1:1 to features; reuse them when naming routes/specs. `references/screenshots/*.png` for visual comparison.
 
 ## MCPs
 
-- Playwright: everything created by Playwright or related to the Playwright MCP has to stay in the `.playwright-mcp/` folder (gitignored).
-- Context7: use this MCP to get updated documentation of the framework.
+- Playwright: all artifacts stay in `.playwright-mcp/` (gitignored) — never in `public/` or `references/`.
+- Context7: use it for current framework docs.
 
 ## SDD
 
-- in this project we use /spec and /spec-impl to develop
+- Features are developed with `/spec` (design) then `/spec-impl` (implementation). Specs live in `specs/` as `NN-slug.md`, written in Spanish; use `specs/01-feed-home.md` as the template.
+- Implement only when the spec's Estado is `Approved`. Acceptance criteria checkboxes are ticked only after verification — the `spec-verifier` agent (`.opencode/agents/`) can run that pass.
 
-## code rules
+## Code rules
 
-- Use clean code, names of functions and variables in english.
+- Clean code; function and variable names in English.
+- UI copy in Spanish exactly as in the mockups — don't translate or rewrite it.
