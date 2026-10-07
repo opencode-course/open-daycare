@@ -60,3 +60,7 @@ OpenDaycare — daycare management app (feed, posts, children profiles, parent a
 ## SDD
 
 - in this project we use /spec and /spec-impl to develop
+
+## code rules
+
+- Use clean code, names of functions and variables in english.
