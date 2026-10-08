@@ -66,19 +66,19 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] El botón «Agregar niño» de `/kids` abre el diálogo sin navegación, con el mismo estilo (gradiente + PlusIcon) que el link actual.
-- [ ] El diálogo replica el mockup: tarjeta de 520px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Cancelar / Agregar niño / Guardar» y los 5 campos con labels y placeholders del mockup.
-- [ ] Tipear «12042022» en fecha produce «12/04/2022»; letras y símbolos no entran; el largo máximo es 10 caracteres.
-- [ ] Guardar con los tres obligatorios vacíos muestra «Ingresá el nombre», «Ingresá la fecha de nacimiento» y «Elegí una sala» con borde `#D9583C`, y no cierra el diálogo.
-- [ ] Una fecha calendario inexistente (p. ej. «31/02/2025») muestra «La fecha no es válida»; una fecha posterior a hoy muestra «La fecha no puede ser posterior a hoy».
-- [ ] El error de un campo desaparece apenas ese campo pasa a ser válido, sin volver a presionar Guardar.
-- [ ] Con nombre, fecha válida y sala «Soles» (alergias y notas vacíos), Guardar cierra el diálogo.
-- [ ] Cancelar, Esc y click en el backdrop cierran el diálogo sin guardar.
-- [ ] Al reabrir el diálogo, los 5 campos están vacíos y sin errores.
-- [ ] El select de Sala muestra «Elegí una sala» como estado inicial, «Soles» como única opción real y el chevron del mockup.
-- [ ] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
-- [ ] `/kids` sigue mostrando los 8 niños y el contador «8 niños»: nada se agrega ni persiste.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/kids`.
+- [x] El botón «Agregar niño» de `/kids` abre el diálogo sin navegación, con el mismo estilo (gradiente + PlusIcon) que el link actual.
+- [x] El diálogo replica el mockup: tarjeta de 520px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Cancelar / Agregar niño / Guardar» y los 5 campos con labels y placeholders del mockup.
+- [x] Tipear «12042022» en fecha produce «12/04/2022»; letras y símbolos no entran; el largo máximo es 10 caracteres.
+- [x] Guardar con los tres obligatorios vacíos muestra «Ingresá el nombre», «Ingresá la fecha de nacimiento» y «Elegí una sala» con borde `#D9583C`, y no cierra el diálogo.
+- [x] Una fecha calendario inexistente (p. ej. «31/02/2025») muestra «La fecha no es válida»; una fecha posterior a hoy muestra «La fecha no puede ser posterior a hoy».
+- [x] El error de un campo desaparece apenas ese campo pasa a ser válido, sin volver a presionar Guardar.
+- [x] Con nombre, fecha válida y sala «Soles» (alergias y notas vacíos), Guardar cierra el diálogo.
+- [x] Cancelar, Esc y click en el backdrop cierran el diálogo sin guardar.
+- [x] Al reabrir el diálogo, los 5 campos están vacíos y sin errores.
+- [x] El select de Sala muestra «Elegí una sala» como estado inicial, «Soles» como única opción real y el chevron del mockup.
+- [x] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
+- [x] `/kids` sigue mostrando los 8 niños y el contador «8 niños»: nada se agrega ni persiste.
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/kids`.
 
 ## Decisions
 
