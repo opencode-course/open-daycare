@@ -1,4 +1,11 @@
-export type PostType = "achievement" | "activity" | "announcement";
+export type PostType =
+  | "achievement"
+  | "activity"
+  | "announcement"
+  | "meal"
+  | "nap"
+  | "mood"
+  | "photo";
 
 export type Post = {
   id: string;
@@ -69,4 +76,18 @@ export const postTypeLabels: Record<PostType, string> = {
   achievement: "LOGRO",
   activity: "ACTIVIDAD",
   announcement: "ANUNCIO",
+  meal: "COMIDA",
+  nap: "SIESTA",
+  mood: "ÁNIMO",
+  photo: "FOTO",
+};
+
+export const postTypeChipLabels: Record<PostType, string> = {
+  meal: "Comida",
+  nap: "Siesta",
+  activity: "Actividad",
+  achievement: "Logro",
+  mood: "Ánimo",
+  photo: "Foto",
+  announcement: "Anuncio",
 };

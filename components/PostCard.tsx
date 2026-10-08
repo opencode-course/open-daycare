@@ -4,12 +4,20 @@ const badgeStyles: Record<PostType, { background: string; foreground: string }> 
   achievement: { background: "bg-[#cfebd8]", foreground: "text-[#3e9b6c]" },
   activity: { background: "bg-[#c7e7f1]", foreground: "text-[#2e89a6]" },
   announcement: { background: "bg-[#ccd8f4]", foreground: "text-[#4e72c8]" },
+  meal: { background: "bg-[#f4dc8e]", foreground: "text-[#9a7b1e]" },
+  nap: { background: "bg-[#e7dcf6]", foreground: "text-[#7b5fc0]" },
+  mood: { background: "bg-[#f9d2de]", foreground: "text-[#c56486]" },
+  photo: { background: "bg-[#fbd8cc]", foreground: "text-[#d9684a]" },
 };
 
 const badgeDotStyles: Record<PostType, string> = {
   achievement: "bg-[#3e9b6c]",
   activity: "bg-[#2e89a6]",
   announcement: "bg-[#4e72c8]",
+  meal: "bg-[#9a7b1e]",
+  nap: "bg-[#7b5fc0]",
+  mood: "bg-[#c56486]",
+  photo: "bg-[#d9684a]",
 };
 
 export function PostCard({ post }: { post: Post }) {
