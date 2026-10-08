@@ -1,6 +1,11 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import {
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
 import { kids } from "@/app/data/mock/kids";
 import {
   currentUser,
@@ -36,14 +41,18 @@ type CreatePostFormValues = {
   description: string;
 };
 
-export function CreatePostDialog() {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [formValues, setFormValues] = useState<CreatePostFormValues>({
+function createInitialFormValues(): CreatePostFormValues {
+  return {
     selectedKidSlugs: [],
     wholeRoom: false,
     type: null,
     description: "",
-  });
+  };
+}
+
+export function CreatePostDialog() {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [formValues, setFormValues] = useState(createInitialFormValues);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const audienceIsInvalid =
@@ -104,6 +113,17 @@ export function CreatePostDialog() {
     dialogRef.current?.close();
   }
 
+  function handleDialogClick(event: MouseEvent<HTMLDialogElement>) {
+    if (event.target === dialogRef.current) {
+      closeDialog();
+    }
+  }
+
+  function resetForm() {
+    setFormValues(createInitialFormValues());
+    setHasSubmitted(false);
+  }
+
   return (
     <>
       <button
@@ -138,32 +158,34 @@ export function CreatePostDialog() {
       <dialog
         ref={dialogRef}
         aria-labelledby="create-post-title"
-        className="m-auto w-[calc(100%-32px)] max-w-[580px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
+        onClick={handleDialogClick}
+        onClose={resetForm}
+        className="m-auto max-h-[calc(100dvh-32px)] w-[calc(100%-32px)] max-w-[580px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
       >
         <form noValidate onSubmit={handleSubmit}>
-          <header className="flex items-center justify-between border-b border-border px-[26px] py-5">
+          <header className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-border px-4 py-5 sm:px-[26px]">
             <button
               type="button"
               onClick={closeDialog}
-              className="text-[15px] font-bold text-muted"
+              className="justify-self-start text-sm font-bold text-muted sm:text-[15px]"
             >
               Cancelar
             </button>
             <h2
               id="create-post-title"
-              className="m-0 font-heading text-[18px] font-semibold text-foreground"
+              className="m-0 text-center font-heading text-base font-semibold text-foreground sm:text-[18px]"
             >
               Nueva publicación
             </h2>
             <button
               type="submit"
-              className="text-[15px] font-extrabold text-[#D9583C]"
+              className="justify-self-end text-sm font-extrabold text-[#D9583C] sm:text-[15px]"
             >
               Publicar
             </button>
           </header>
 
-          <div className="px-[26px] py-6">
+          <div className="max-h-[calc(100dvh-112px)] overflow-y-auto px-[26px] py-6">
             <section className="mb-[22px]" aria-labelledby="post-audience-label">
               <h3
                 id="post-audience-label"
