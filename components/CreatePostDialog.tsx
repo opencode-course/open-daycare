@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { kids } from "@/app/data/mock/kids";
 import {
   currentUser,
@@ -19,8 +19,82 @@ const postTypeOrder: PostType[] = [
   "announcement",
 ];
 
+const postTypeSelectedStyles: Record<PostType, string> = {
+  meal: "border-transparent bg-[#9A7B1E] text-white",
+  nap: "border-transparent bg-[#E7DCF6] text-[#7B5FC0]",
+  activity: "border-transparent bg-[#2E89A6] text-white",
+  achievement: "border-transparent bg-[#CFEBD8] text-[#3E9B6C]",
+  mood: "border-transparent bg-[#F9D2DE] text-[#C56486]",
+  photo: "border-transparent bg-[#FBD8CC] text-[#D9684A]",
+  announcement: "border-transparent bg-[#CCD8F4] text-[#4E72C8]",
+};
+
+type CreatePostFormValues = {
+  selectedKidSlugs: string[];
+  wholeRoom: boolean;
+  type: PostType | null;
+  description: string;
+};
+
 export function CreatePostDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [formValues, setFormValues] = useState<CreatePostFormValues>({
+    selectedKidSlugs: [],
+    wholeRoom: false,
+    type: null,
+    description: "",
+  });
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const audienceIsInvalid =
+    !formValues.wholeRoom && formValues.selectedKidSlugs.length === 0;
+  const typeIsInvalid = formValues.type === null;
+  const descriptionIsInvalid = formValues.description.trim().length === 0;
+
+  function toggleKid(kidSlug: string) {
+    setFormValues((current) => {
+      const isSelected = current.selectedKidSlugs.includes(kidSlug);
+
+      return {
+        ...current,
+        wholeRoom: false,
+        selectedKidSlugs: isSelected
+          ? current.selectedKidSlugs.filter((slug) => slug !== kidSlug)
+          : [...current.selectedKidSlugs, kidSlug],
+      };
+    });
+  }
+
+  function toggleWholeRoom() {
+    setFormValues((current) => {
+      const wholeRoom = !current.wholeRoom;
+
+      return {
+        ...current,
+        wholeRoom,
+        selectedKidSlugs: wholeRoom ? [] : current.selectedKidSlugs,
+      };
+    });
+  }
+
+  function selectPostType(type: PostType) {
+    setFormValues((current) => ({ ...current, type }));
+  }
+
+  function updateDescription(description: string) {
+    setFormValues((current) => ({ ...current, description }));
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setHasSubmitted(true);
+
+    if (audienceIsInvalid || typeIsInvalid || descriptionIsInvalid) {
+      return;
+    }
+
+    dialogRef.current?.close();
+  }
 
   function openDialog() {
     dialogRef.current?.showModal();
@@ -66,7 +140,7 @@ export function CreatePostDialog() {
         aria-labelledby="create-post-title"
         className="m-auto w-[calc(100%-32px)] max-w-[580px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
       >
-        <form onSubmit={(event) => event.preventDefault()}>
+        <form noValidate onSubmit={handleSubmit}>
           <header className="flex items-center justify-between border-b border-border px-[26px] py-5">
             <button
               type="button"
@@ -97,29 +171,63 @@ export function CreatePostDialog() {
               >
                 PARA
               </h3>
-              <div className="flex flex-wrap gap-[9px]">
-                {kids.map((kid) => (
-                  <button
-                    key={kid.slug}
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border-[1.5px] border-[#ECE0D0] bg-[#FFFDF9] py-[6px] pr-[14px] pl-[6px] text-sm font-bold text-[#6E6359]"
-                  >
-                    <span
-                      className={`flex size-[26px] items-center justify-center rounded-full font-heading text-[13px] font-semibold ${avatarToneClasses[kid.avatarTone]}`}
-                      aria-hidden="true"
+              <div
+                className="flex flex-wrap gap-[9px]"
+                role="group"
+                aria-label="Destinatarios"
+                aria-describedby={
+                  hasSubmitted && audienceIsInvalid ? "audience-error" : undefined
+                }
+              >
+                {kids.map((kid) => {
+                  const isSelected = formValues.selectedKidSlugs.includes(
+                    kid.slug,
+                  );
+
+                  return (
+                    <button
+                      key={kid.slug}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => toggleKid(kid.slug)}
+                      className={`flex items-center gap-2 rounded-full border-[1.5px] py-[6px] pr-[14px] pl-[6px] text-sm font-bold ${
+                        isSelected
+                          ? "border-[#3F362E] bg-[#3F362E] text-white"
+                          : "border-[#ECE0D0] bg-[#FFFDF9] text-[#6E6359]"
+                      }`}
                     >
-                      {kid.avatarInitial}
-                    </span>
-                    {kid.name.split(" ")[0]}
-                  </button>
-                ))}
+                      <span
+                        className={`flex size-[26px] items-center justify-center rounded-full font-heading text-[13px] font-semibold ${avatarToneClasses[kid.avatarTone]}`}
+                        aria-hidden="true"
+                      >
+                        {kid.avatarInitial}
+                      </span>
+                      {kid.name.split(" ")[0]}
+                    </button>
+                  );
+                })}
                 <button
                   type="button"
-                  className="rounded-full border-[1.5px] border-[#ECE0D0] bg-[#FFFDF9] px-4 py-[6px] text-sm font-bold text-[#6E6359]"
+                  aria-pressed={formValues.wholeRoom}
+                  onClick={toggleWholeRoom}
+                  className={`rounded-full border-[1.5px] px-4 py-[6px] text-sm font-bold ${
+                    formValues.wholeRoom
+                      ? "border-[#3F362E] bg-[#3F362E] text-white"
+                      : "border-[#ECE0D0] bg-[#FFFDF9] text-[#6E6359]"
+                  }`}
                 >
                   Toda la sala
                 </button>
               </div>
+              {hasSubmitted && audienceIsInvalid && (
+                <p
+                  id="audience-error"
+                  role="alert"
+                  className="mt-2 text-sm font-bold text-[#D9583C]"
+                >
+                  Elegí para quién
+                </p>
+              )}
             </section>
 
             <section className="mb-[22px]" aria-labelledby="post-type-label">
@@ -129,20 +237,45 @@ export function CreatePostDialog() {
               >
                 TIPO
               </h3>
-              <div className="flex flex-wrap gap-[9px]">
+              <div
+                className="flex flex-wrap gap-[9px]"
+                role="group"
+                aria-label="Tipo de publicación"
+                aria-describedby={
+                  hasSubmitted && typeIsInvalid ? "type-error" : undefined
+                }
+              >
                 {postTypeOrder.map((type) => (
                   <button
                     key={type}
                     type="button"
-                    className="rounded-full border-[1.5px] border-[#ECE0D0] bg-[#FFFDF9] px-4 py-2 text-[13.5px] font-extrabold text-[#6E6359]"
+                    aria-pressed={formValues.type === type}
+                    onClick={() => selectPostType(type)}
+                    className={`rounded-full border-[1.5px] px-4 py-2 text-[13.5px] font-extrabold ${
+                      formValues.type === type
+                        ? postTypeSelectedStyles[type]
+                        : "border-[#ECE0D0] bg-[#FFFDF9] text-[#6E6359]"
+                    }`}
                   >
                     {postTypeChipLabels[type]}
                   </button>
                 ))}
               </div>
+              {hasSubmitted && typeIsInvalid && (
+                <p
+                  id="type-error"
+                  role="alert"
+                  className="mt-2 text-sm font-bold text-[#D9583C]"
+                >
+                  Elegí un tipo
+                </p>
+              )}
             </section>
 
-            <section aria-labelledby="post-description-label">
+            <section
+              className="mb-[22px]"
+              aria-labelledby="post-description-label"
+            >
               <h3
                 id="post-description-label"
                 className="mb-[10px] text-[12px] font-extrabold tracking-[0.7px] text-muted"
@@ -151,9 +284,30 @@ export function CreatePostDialog() {
               </h3>
               <textarea
                 aria-labelledby="post-description-label"
+                aria-invalid={hasSubmitted && descriptionIsInvalid}
+                aria-describedby={
+                  hasSubmitted && descriptionIsInvalid
+                    ? "description-error"
+                    : undefined
+                }
+                value={formValues.description}
+                onChange={(event) => updateDescription(event.target.value)}
                 placeholder="Contá cómo le fue hoy…"
-                className="mb-[22px] min-h-[120px] w-full resize-y rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px] text-[15px] leading-[1.5] text-foreground placeholder:text-[#B6A99B] focus:outline-none"
+                className={`min-h-[120px] w-full resize-y rounded-[14px] border-[1.5px] bg-white px-4 py-[14px] text-[15px] leading-[1.5] text-foreground placeholder:text-[#B6A99B] focus:outline-none ${
+                  hasSubmitted && descriptionIsInvalid
+                    ? "border-[#D9583C]"
+                    : "border-[#EADFD0]"
+                }`}
               />
+              {hasSubmitted && descriptionIsInvalid && (
+                <p
+                  id="description-error"
+                  role="alert"
+                  className="mt-2 text-sm font-bold text-[#D9583C]"
+                >
+                  Escribí la descripción
+                </p>
+              )}
             </section>
 
             <section aria-labelledby="post-photos-label">
