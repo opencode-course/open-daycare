@@ -1,6 +1,6 @@
 # SPEC 04 — Agregar niño: diálogo con validación
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 02, SPEC 03
 > **Fecha:** 2026-10-08
 > **Objetivo:** Implementar el botón «Agregar niño» de `/kids` como disparador de un diálogo nativo con el formulario de `references/pantallas/agregar-nino.dc.html`, donde nombre, fecha de nacimiento (con máscara dd/mm/aaaa) y sala son obligatorios, con validación inline propia y sin persistencia.

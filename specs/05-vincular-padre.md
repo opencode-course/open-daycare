@@ -1,6 +1,6 @@
 # SPEC 05 — Vincular padre: diálogo con validación
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 02, SPEC 04
 > **Fecha:** 2026-10-08
 > **Objetivo:** Implementar el link «Vincular otro padre» de `/kids/[slug]` como disparador de un diálogo nativo con el formulario de `references/pantallas/vincular-padre.dc.html`, donde nombre, email y parentesco (Mamá/Papá/Tutor/a) son obligatorios con validación inline, código de invitación estático y sin persistencia.
