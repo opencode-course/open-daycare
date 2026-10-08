@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { BirthDateInput, validateBirthDate } from "@/components/BirthDateInput";
 
 const labelClassName =
@@ -19,6 +19,13 @@ type AddKidFormValues = {
 
 type RequiredField = "name" | "birthDate" | "classroom";
 type AddKidErrors = Partial<Record<RequiredField, string>>;
+const initialFormValues: AddKidFormValues = {
+  name: "",
+  birthDate: "",
+  classroom: "",
+  allergies: "",
+  notes: "",
+};
 
 function getFieldError(field: RequiredField, value: string): string | null {
   if (field === "name") {
@@ -67,7 +74,7 @@ function ChevronIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-[#B0A290]"
+      className="pointer-events-none absolute top-1/2 right-2 size-3.5 -translate-y-1/2 text-[#B0A290] sm:right-4 sm:size-4"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -82,13 +89,7 @@ function ChevronIcon() {
 
 export function AddKidDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [formValues, setFormValues] = useState<AddKidFormValues>({
-    name: "",
-    birthDate: "",
-    classroom: "",
-    allergies: "",
-    notes: "",
-  });
+  const [formValues, setFormValues] = useState(initialFormValues);
   const [errors, setErrors] = useState<AddKidErrors>({});
 
   function openDialog() {
@@ -97,6 +98,17 @@ export function AddKidDialog() {
 
   function closeDialog() {
     dialogRef.current?.close();
+  }
+
+  function handleDialogClick(event: MouseEvent<HTMLDialogElement>) {
+    if (event.target === dialogRef.current) {
+      closeDialog();
+    }
+  }
+
+  function handleClose() {
+    setFormValues(initialFormValues);
+    setErrors({});
   }
 
   function updateField(field: keyof AddKidFormValues, value: string) {
@@ -151,7 +163,9 @@ export function AddKidDialog() {
       <dialog
         ref={dialogRef}
         aria-labelledby="add-kid-title"
-        className="m-auto w-[calc(100%-2rem)] max-w-[520px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
+        onClick={handleDialogClick}
+        onClose={handleClose}
+        className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[520px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
       >
         <header className="flex items-center justify-between border-b border-border px-[26px] py-5">
           <button
@@ -179,7 +193,7 @@ export function AddKidDialog() {
         <form
           id="add-kid-form"
           onSubmit={handleSubmit}
-          className="px-[26px] py-6"
+          className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-6"
         >
           <div className="mb-[18px]">
             <label htmlFor="kid-name" className={labelClassName}>
@@ -202,7 +216,7 @@ export function AddKidDialog() {
             )}
           </div>
 
-          <div className="mb-[18px] grid grid-cols-2 gap-[14px]">
+          <div className="mb-[18px] grid grid-cols-[0.9fr_1.1fr] gap-[14px] sm:grid-cols-2">
             <div>
               <label htmlFor="kid-birth-date" className={labelClassName}>
                 FECHA DE NACIMIENTO
@@ -242,7 +256,7 @@ export function AddKidDialog() {
                   aria-describedby={
                     errors.classroom ? "kid-classroom-error" : undefined
                   }
-                  className={`${getInputClassName(Boolean(errors.classroom))} appearance-none pr-10 font-bold`}
+                  className={`${getInputClassName(Boolean(errors.classroom))} appearance-none px-2 pr-6 text-[13px] font-bold sm:px-4 sm:pr-10 sm:text-[15px]`}
                 >
                   <option value="">Elegí una sala</option>
                   <option value="Soles">Soles</option>
