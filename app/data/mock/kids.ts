@@ -1,5 +1,5 @@
 export type AvatarTone = "sky" | "rose" | "mint" | "sun" | "lilac" | "skySoft";
-export type ParentRole = "mother" | "father";
+export type ParentRole = "mother" | "father" | "tutor";
 export type ParentStatus = "active" | "pending";
 
 export type ParentLink = {
@@ -121,6 +121,7 @@ export const kidDetail = {
 export const parentRoleLabels: Record<ParentRole, string> = {
   mother: "Mamá",
   father: "Papá",
+  tutor: "Tutor/a",
 };
 
 export const parentStatusLabels: Record<ParentStatus, string> = {
