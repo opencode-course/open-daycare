@@ -1,6 +1,6 @@
 # SPEC 06 — Nueva publicación: diálogo con validación
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-10-08
 > **Objetivo:** Implementar la tarjeta «Compartí un momento…» de `/` como disparador de un diálogo nativo con el formulario de `references/pantallas/crear-publicacion.dc.html`, donde destinatario (niños en multi-selección con «Toda la sala» excluyente), tipo y descripción son obligatorios, con validación inline propia y sin persistencia.
@@ -90,21 +90,21 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] La tarjeta «Compartí un momento…» de `/` abre el diálogo sin navegación, con el mismo estilo (avatar C, texto, tile con icono de cámara) que el link actual.
-- [ ] El diálogo replica el mockup: tarjeta de 580px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Cancelar / Nueva publicación / Publicar», labels PARA/TIPO/DESCRIPCIÓN/FOTOS y textarea con placeholder «Contá cómo le fue hoy…».
-- [ ] PARA muestra los 8 niños del mock con su avatar de tono real y primer nombre, más «Toda la sala»; al abrir no hay nada marcado.
-- [ ] Marcar un niño lo resalta (fondo `#3F362E`, texto blanco) y permite marcar otros; marcar «Toda la sala» desmarca los niños y marcar un niño desactiva «Toda la sala».
-- [ ] TIPO muestra las 7 píldoras neutras al abrir; elegir una le aplica su color del mockup (p. ej. Comida `#9A7B1E` con texto blanco) y desmarca las demás.
-- [ ] Publicar con todo vacío muestra «Elegí para quién», «Elegí un tipo» y «Escribí la descripción», y no cierra el diálogo.
-- [ ] El error de cada campo desaparece apenas ese campo pasa a ser válido (tipear la descripción, marcar chip o píldora), sin volver a presionar Publicar.
-- [ ] Con un destinatario, un tipo y descripción con texto, «Publicar» cierra el diálogo.
-- [ ] El feed no cambia tras publicar: siguen los 3 posts con sus contadores 3/1, 5/2 y 8/0.
-- [ ] Cancelar, Esc y click en el backdrop cierran el diálogo sin publicar.
-- [ ] Al reabrir el diálogo, no hay chips ni píldoras marcadas, la textarea está vacía y no hay errores.
-- [ ] La sección FOTOS muestra los dos tiles del mockup (placeholder + «Agregar») sin interacción.
-- [ ] `/` y `/kids` se renderizan igual tras extender `PostType` y extraer `avatarToneClasses`.
-- [ ] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/`.
+- [x] La tarjeta «Compartí un momento…» de `/` abre el diálogo sin navegación, con el mismo estilo (avatar C, texto, tile con icono de cámara) que el link actual.
+- [x] El diálogo replica el mockup: tarjeta de 580px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Cancelar / Nueva publicación / Publicar», labels PARA/TIPO/DESCRIPCIÓN/FOTOS y textarea con placeholder «Contá cómo le fue hoy…».
+- [x] PARA muestra los 8 niños del mock con su avatar de tono real y primer nombre, más «Toda la sala»; al abrir no hay nada marcado.
+- [x] Marcar un niño lo resalta (fondo `#3F362E`, texto blanco) y permite marcar otros; marcar «Toda la sala» desmarca los niños y marcar un niño desactiva «Toda la sala».
+- [x] TIPO muestra las 7 píldoras neutras al abrir; elegir una le aplica su color del mockup (p. ej. Comida `#9A7B1E` con texto blanco) y desmarca las demás.
+- [x] Publicar con todo vacío muestra «Elegí para quién», «Elegí un tipo» y «Escribí la descripción», y no cierra el diálogo.
+- [x] El error de cada campo desaparece apenas ese campo pasa a ser válido (tipear la descripción, marcar chip o píldora), sin volver a presionar Publicar.
+- [x] Con un destinatario, un tipo y descripción con texto, «Publicar» cierra el diálogo.
+- [x] El feed no cambia tras publicar: siguen los 3 posts con sus contadores 3/1, 5/2 y 8/0.
+- [x] Cancelar, Esc y click en el backdrop cierran el diálogo sin publicar.
+- [x] Al reabrir el diálogo, no hay chips ni píldoras marcadas, la textarea está vacía y no hay errores.
+- [x] La sección FOTOS muestra los dos tiles del mockup (placeholder + «Agregar») sin interacción.
+- [x] `/` y `/kids` se renderizan igual tras extender `PostType` y extraer `avatarToneClasses`.
+- [x] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/`.
 
 ## Decisions
 
