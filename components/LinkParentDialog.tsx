@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { parentRoleLabels, type ParentRole } from "@/app/data/mock/kids";
 
 const parentRoles: ParentRole[] = ["mother", "father", "tutor"];
@@ -126,6 +126,17 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
     dialogRef.current?.close();
   }
 
+  function handleDialogClick(event: MouseEvent<HTMLDialogElement>) {
+    if (event.target === dialogRef.current) {
+      closeDialog();
+    }
+  }
+
+  function handleClose() {
+    setFormValues(initialFormValues);
+    setErrors({});
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -195,7 +206,9 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
       <dialog
         ref={dialogRef}
         aria-labelledby="link-parent-title"
-        className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[480px] overflow-y-auto rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
+        onClick={handleDialogClick}
+        onClose={handleClose}
+        className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[480px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
       >
         <header className="flex items-center justify-between border-b border-border px-[26px] py-5">
           <div>
@@ -220,7 +233,7 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
         <form
           noValidate
           onSubmit={handleSubmit}
-          className="px-[26px] py-[22px]"
+          className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-[22px]"
         >
           <div className="mb-5 flex gap-[11px] rounded-[14px] bg-[#E3ECFB] px-4 py-[13px]">
             <InfoIcon />
