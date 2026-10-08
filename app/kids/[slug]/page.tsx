@@ -14,6 +14,8 @@ type KidPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+export const instant = false;
+
 const avatarToneClasses: Record<AvatarTone, string> = {
   sky: "bg-[#A9D9E8] text-[#1F7A93]",
   rose: "bg-[#F4B8CC] text-[#C44A7A]",
@@ -40,8 +42,12 @@ export async function generateMetadata({ params }: KidPageProps): Promise<Metada
   const { slug } = await params;
   const kid = kids.find((item) => item.slug === slug);
 
+  if (!kid) {
+    notFound();
+  }
+
   return {
-    title: kid ? `${kid.name} · OpenDayCare` : "OpenDayCare",
+    title: `${kid.name} · OpenDayCare`,
   };
 }
 

@@ -1,6 +1,6 @@
 # SPEC 02 — Niños: lista y perfil
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-10-07
 > **Objetivo:** Implementar las rutas `/kids` (lista) y `/kids/[slug]` (perfil) según `references/pantallas/ninos.dc.html` y `references/pantallas/perfil-nino.dc.html`, con mock compartido y «Niños» navegable desde la sidebar.
@@ -127,19 +127,19 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `/kids` muestra encabezado «GESTIÓN / Niños», botón «Agregar niño» con `href="#"`, búsqueda decorativa y divisor «SALA SOLES · 8 niños».
-- [ ] La grilla muestra los 8 niños: 2 columnas desde `sm` y 1 por debajo.
-- [ ] Cada tarjeta muestra avatar con inicial y tono del mockup, nombre en Fredoka y subtítulo correcto: «2 padres vinculados» (Mateo, Benjamín), «1 padre vinculado» (Sofía, Tomás, Emma, Lucas, Olivia), «sin padres vinculados» (Valentina).
-- [ ] Mateo muestra badge «MANÍ», Tomás «LACTOSA», Valentina «VINCULAR»; los demás muestran la flecha.
-- [ ] El hover de la tarjeta aplica borde `#F2A78E` y desplazamiento de 2px.
-- [ ] Cada tarjeta navega a su `/kids/[slug]` y «Volver a Niños» regresa a `/kids`.
-- [ ] El perfil muestra el encabezado del niño (avatar 84px, nombre, «N años · Sala Soles») y el resto idéntico al mockup: tarjeta «Alergias y notas» con su texto, filas «Fecha de nacimiento · 12 mar 2022», «Sala · Soles» e «Ingreso · feb 2025».
-- [ ] El perfil muestra «Resumen del día» y «Vincular otro padre» con `href="#"`, y los padres con badges «ACTIVA» y «PENDIENTE».
-- [ ] `/kids/slug-inexistente` devuelve 404.
-- [ ] La sidebar marca «Niños» activo en `/kids` y su perfil, «Feed» activo solo en `/`; «Avisos» y «Mi cuenta» siguen en `href="#"`.
-- [ ] Los títulos de pestaña son «Niños · OpenDayCare» y «{nombre} · OpenDayCare».
-- [ ] En 375px la grilla es de 1 columna y el perfil apila la columna derecha debajo.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/`, `/kids` y un perfil.
+- [x] `/kids` muestra encabezado «GESTIÓN / Niños», botón «Agregar niño» con `href="#"`, búsqueda decorativa y divisor «SALA SOLES · 8 niños».
+- [x] La grilla muestra los 8 niños: 2 columnas desde `sm` y 1 por debajo.
+- [x] Cada tarjeta muestra avatar con inicial y tono del mockup, nombre en Fredoka y subtítulo correcto: «2 padres vinculados» (Mateo, Benjamín), «1 padre vinculado» (Sofía, Tomás, Emma, Lucas, Olivia), «sin padres vinculados» (Valentina).
+- [x] Mateo muestra badge «MANÍ», Tomás «LACTOSA», Valentina «VINCULAR»; los demás muestran la flecha.
+- [x] El hover de la tarjeta aplica borde `#F2A78E` y desplazamiento de 2px.
+- [x] Cada tarjeta navega a su `/kids/[slug]` y «Volver a Niños» regresa a `/kids`.
+- [x] El perfil muestra el encabezado del niño (avatar 84px, nombre, «N años · Sala Soles») y el resto idéntico al mockup: tarjeta «Alergias y notas» con su texto, filas «Fecha de nacimiento · 12 mar 2022», «Sala · Soles» e «Ingreso · feb 2025».
+- [x] El perfil muestra «Resumen del día» y «Vincular otro padre» con `href="#"`, y los padres con badges «ACTIVA» y «PENDIENTE».
+- [x] `/kids/slug-inexistente` devuelve 404.
+- [x] La sidebar marca «Niños» activo en `/kids` y su perfil, «Feed» activo solo en `/`; «Avisos» y «Mi cuenta» siguen en `href="#"`.
+- [x] Los títulos de pestaña son «Niños · OpenDayCare» y «{nombre} · OpenDayCare».
+- [x] En 375px la grilla es de 1 columna y el perfil apila la columna derecha debajo.
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en `/`, `/kids` y un perfil.
 
 ## Decisions
 
