@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { BirthDateInput } from "@/components/BirthDateInput";
 
 const labelClassName =
   "mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted";
@@ -43,6 +44,7 @@ function ChevronIcon() {
 
 export function AddKidDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [birthDate, setBirthDate] = useState("");
 
   function openDialog() {
     dialogRef.current?.showModal();
@@ -113,10 +115,11 @@ export function AddKidDialog() {
               <label htmlFor="kid-birth-date" className={labelClassName}>
                 FECHA DE NACIMIENTO
               </label>
-              <input
+              <BirthDateInput
                 id="kid-birth-date"
                 name="birthDate"
-                placeholder="dd/mm/aaaa"
+                value={birthDate}
+                onChange={setBirthDate}
                 className={fieldClassName}
               />
             </div>
