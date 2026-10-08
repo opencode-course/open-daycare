@@ -1,6 +1,6 @@
 # SPEC 03 — Login y activar cuenta
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-10-08
 > **Objetivo:** Implementar `/auth/login` y `/auth/activate-account` según `references/pantallas/login.dc.html` y `references/pantallas/activar-cuenta.dc.html`, fuera del shell compartido y sin autenticación real.
@@ -43,16 +43,16 @@ Esta feature no introduce nuevas estructuras de datos. No hay arrays ni registro
 
 ## Acceptance criteria
 
-- [ ] `/auth/login` y `/auth/activate-account` renderizan a página completa, sin sidebar ni topbar.
-- [ ] `/`, `/kids` y `/kids/[slug]` siguen funcionando tras la reubicación con el shell intacto: sidebar de 248px en desktop y topbar + drawer en 375px.
-- [ ] `/auth/login` muestra el panel de branding con el gradiente `#F6A98E→#EC7E62`, los dos círculos decorativos, el titular «El día de cada niño, compartido con su familia.» y el pie «🌿 Guardería Sala Soles».
-- [ ] `/auth/login` no muestra el bloque «INGRESO COMO» ni los botones Personal/Familia.
-- [ ] Los inputs están vacíos y muestran los placeholders «caro@opendaycare.com», «••••••••», «7K4P9» y «lucia.fernandez@gmail.com» según el campo.
-- [ ] «Iniciar sesión» navega a `/`; «Activar mi cuenta» y «¿Olvidaste tu contraseña?» quedan en `href="#"`; «Activá tu cuenta» e «Iniciar sesión» (pies) navegan entre las dos rutas de auth.
-- [ ] La checkbox de autorización está desmarcada por defecto; al marcarla aparece la caja verde `#5FB97E` con el check blanco del mockup.
-- [ ] En 375px, `/auth/login` oculta el panel de branding y centra el formulario; `/auth/activate-account` se ve completa sin scroll horizontal.
-- [ ] Los títulos de pestaña son «Iniciar sesión · OpenDayCare» y «Activar cuenta · OpenDayCare».
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en las rutas nuevas ni en las existentes.
+- [x] `/auth/login` y `/auth/activate-account` renderizan a página completa, sin sidebar ni topbar.
+- [x] `/`, `/kids` y `/kids/[slug]` siguen funcionando tras la reubicación con el shell intacto: sidebar de 248px en desktop y topbar + drawer en 375px.
+- [x] `/auth/login` muestra el panel de branding con el gradiente `#F6A98E→#EC7E62`, los dos círculos decorativos, el titular «El día de cada niño, compartido con su familia.» y el pie «🌿 Guardería Sala Soles».
+- [x] `/auth/login` no muestra el bloque «INGRESO COMO» ni los botones Personal/Familia.
+- [x] Los inputs están vacíos y muestran los placeholders «caro@opendaycare.com», «••••••••», «7K4P9» y «lucia.fernandez@gmail.com» según el campo.
+- [x] «Iniciar sesión» navega a `/`; «Activar mi cuenta» y «¿Olvidaste tu contraseña?» quedan en `href="#"`; «Activá tu cuenta» e «Iniciar sesión» (pies) navegan entre las dos rutas de auth.
+- [x] La checkbox de autorización está desmarcada por defecto; al marcarla aparece la caja verde `#5FB97E` con el check blanco del mockup.
+- [x] En 375px, `/auth/login` oculta el panel de branding y centra el formulario; `/auth/activate-account` se ve completa sin scroll horizontal.
+- [x] Los títulos de pestaña son «Iniciar sesión · OpenDayCare» y «Activar cuenta · OpenDayCare».
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en las rutas nuevas ni en las existentes.
 
 ## Decisions
 
