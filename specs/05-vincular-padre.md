@@ -64,20 +64,20 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] El link «Vincular otro padre» de `/kids/[slug]` abre el diálogo sin navegación, con el mismo estilo (avatar punteado + PlusIcon + «Vincular otro padre») que el link actual.
-- [ ] El diálogo replica el mockup: tarjeta de 480px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Vincular padre / a {kidName}» con X, callout azul, campos con labels y placeholders, 3 píldoras, caja «7K4P9» con «Vence en 7 días» y botón «Enviar invitación» con gradiente.
-- [ ] En otro perfil (p. ej. `/kids/sofia-mendez`) el subtítulo dice «a Sofía Méndez» y el callout «Solo verá el feed de Sofía.».
-- [ ] Enviar con los tres campos vacíos muestra «Ingresá el nombre del padre o madre», «Ingresá el email» y «Elegí el parentesco» con borde `#D9583C`, y no cierra el diálogo.
-- [ ] Un email sin arroba o sin dominio (p. ej. «diego@» o «diegofernandez») muestra «El email no es válido».
-- [ ] El error de un campo desaparece apenas ese campo pasa a ser válido (tipeo en inputs, click en píldora), sin volver a presionar Enviar.
-- [ ] Las píldoras abren deseleccionadas; elegir una la marca (borde `#9FB8EC`, fondo `#CCD8F4`) y desmarca las demás.
-- [ ] Con nombre, email válido y parentesco elegido, «Enviar invitación» cierra el diálogo.
-- [ ] X, Esc y click en el backdrop cierran el diálogo sin enviar.
-- [ ] Al reabrir el diálogo, los inputs están vacíos, las píldoras deseleccionadas y no hay errores.
-- [ ] La lista PADRES VINCULADOS no cambia tras enviar: no hay persistencia.
-- [ ] `/kids/[slug]` sigue renderizando sin errores tras extender `ParentRole` (ningún padre mock tiene rol `tutor`).
-- [ ] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en un perfil.
+- [x] El link «Vincular otro padre» de `/kids/[slug]` abre el diálogo sin navegación, con el mismo estilo (avatar punteado + PlusIcon + «Vincular otro padre») que el link actual.
+- [x] El diálogo replica el mockup: tarjeta de 480px fondo `#FBF4EC` borde `#ECE0D0` radius 24px, header «Vincular padre / a {kidName}» con X, callout azul, campos con labels y placeholders, 3 píldoras, caja «7K4P9» con «Vence en 7 días» y botón «Enviar invitación» con gradiente.
+- [x] En otro perfil (p. ej. `/kids/sofia-mendez`) el subtítulo dice «a Sofía Méndez» y el callout «Solo verá el feed de Sofía.».
+- [x] Enviar con los tres campos vacíos muestra «Ingresá el nombre del padre o madre», «Ingresá el email» y «Elegí el parentesco» con borde `#D9583C`, y no cierra el diálogo.
+- [x] Un email sin arroba o sin dominio (p. ej. «diego@» o «diegofernandez») muestra «El email no es válido».
+- [x] El error de un campo desaparece apenas ese campo pasa a ser válido (tipeo en inputs, click en píldora), sin volver a presionar Enviar.
+- [x] Las píldoras abren deseleccionadas; elegir una la marca (borde `#9FB8EC`, fondo `#CCD8F4`) y desmarca las demás.
+- [x] Con nombre, email válido y parentesco elegido, «Enviar invitación» cierra el diálogo.
+- [x] X, Esc y click en el backdrop cierran el diálogo sin enviar.
+- [x] Al reabrir el diálogo, los inputs están vacíos, las píldoras deseleccionadas y no hay errores.
+- [x] La lista PADRES VINCULADOS no cambia tras enviar: no hay persistencia.
+- [x] `/kids/[slug]` sigue renderizando sin errores tras extender `ParentRole` (ningún padre mock tiene rol `tutor`).
+- [x] En 375px el diálogo entra sin scroll horizontal y el contenido hace scroll interno si no cabe.
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores en un perfil.
 
 ## Decisions
 

@@ -76,7 +76,7 @@ function InfoIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="mt-px size-5 shrink-0"
+      className="mt-px size-5 shrink-0 text-[#4E72C8]"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
