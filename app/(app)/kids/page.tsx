@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { kids } from "@/app/data/mock/kids";
+import { AddKidDialog } from "@/components/AddKidDialog";
 import { KidCard } from "@/components/KidCard";
 
 export const metadata: Metadata = {
@@ -24,23 +25,6 @@ function SearchIcon() {
   );
 }
 
-function PlusIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-[17px] shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
-}
-
 export default function KidsPage() {
   return (
     <div className="mx-auto w-full max-w-[880px] px-5 pb-20 pt-[34px] sm:px-10">
@@ -54,13 +38,7 @@ export default function KidsPage() {
           </h1>
         </div>
 
-        <a
-          href="#"
-          className="flex shrink-0 items-center gap-2 rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] px-[18px] py-[11px] text-[14.5px] font-extrabold text-white shadow-[0_8px_18px_-8px_rgba(238,129,100,0.7)]"
-        >
-          <PlusIcon />
-          Agregar niño
-        </a>
+        <AddKidDialog />
       </header>
 
       <div className="mb-[22px] flex items-center gap-[11px] rounded-[14px] border border-border bg-surface px-4 py-3">
