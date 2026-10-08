@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
-import { MobileNavigation } from "@/components/MobileNavigation";
-import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -26,17 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <div className="flex min-h-screen bg-background">
-          <div className="hidden shrink-0 lg:block">
-            <Sidebar />
-          </div>
-          <main className="min-w-0 flex-1 pt-16 lg:pt-0">
-            <MobileNavigation>
-              <Sidebar variant="drawer" />
-            </MobileNavigation>
-            {children}
-          </main>
-        </div>
+        {children}
       </body>
     </html>
   );
