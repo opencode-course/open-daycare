@@ -1,12 +1,50 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { BirthDateInput } from "@/components/BirthDateInput";
+import { useRef, useState, type FormEvent } from "react";
+import { BirthDateInput, validateBirthDate } from "@/components/BirthDateInput";
 
 const labelClassName =
   "mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted";
-const fieldClassName =
-  "w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[13px] text-[15px] text-foreground outline-none placeholder:text-[#B6A99B]";
+const fieldBaseClassName =
+  "w-full rounded-[14px] border-[1.5px] bg-white px-4 py-[13px] text-[15px] text-foreground outline-none placeholder:text-[#B6A99B]";
+const errorMessageClassName = "mt-1.5 text-[12px] leading-snug text-[#D9583C]";
+
+type AddKidFormValues = {
+  name: string;
+  birthDate: string;
+  classroom: string;
+  allergies: string;
+  notes: string;
+};
+
+type RequiredField = "name" | "birthDate" | "classroom";
+type AddKidErrors = Partial<Record<RequiredField, string>>;
+
+function getFieldError(field: RequiredField, value: string): string | null {
+  if (field === "name") {
+    return value.trim() ? null : "Ingresá el nombre";
+  }
+
+  if (field === "classroom") {
+    return value ? null : "Elegí una sala";
+  }
+
+  const birthDateError = validateBirthDate(value);
+
+  if (birthDateError === "empty") {
+    return "Ingresá la fecha de nacimiento";
+  }
+
+  if (birthDateError === "invalid") {
+    return "La fecha no es válida";
+  }
+
+  if (birthDateError === "future") {
+    return "La fecha no puede ser posterior a hoy";
+  }
+
+  return null;
+}
 
 function PlusIcon() {
   return (
@@ -44,7 +82,14 @@ function ChevronIcon() {
 
 export function AddKidDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [birthDate, setBirthDate] = useState("");
+  const [formValues, setFormValues] = useState<AddKidFormValues>({
+    name: "",
+    birthDate: "",
+    classroom: "",
+    allergies: "",
+    notes: "",
+  });
+  const [errors, setErrors] = useState<AddKidErrors>({});
 
   function openDialog() {
     dialogRef.current?.showModal();
@@ -52,6 +97,44 @@ export function AddKidDialog() {
 
   function closeDialog() {
     dialogRef.current?.close();
+  }
+
+  function updateField(field: keyof AddKidFormValues, value: string) {
+    setFormValues((currentValues) => ({ ...currentValues, [field]: value }));
+
+    if (field === "name" || field === "birthDate" || field === "classroom") {
+      setErrors((currentErrors) => {
+        if (!currentErrors[field]) {
+          return currentErrors;
+        }
+
+        return {
+          ...currentErrors,
+          [field]: getFieldError(field, value) ?? undefined,
+        };
+      });
+    }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextErrors: AddKidErrors = {
+      name: getFieldError("name", formValues.name) ?? undefined,
+      birthDate: getFieldError("birthDate", formValues.birthDate) ?? undefined,
+      classroom: getFieldError("classroom", formValues.classroom) ?? undefined,
+    };
+
+    setErrors(nextErrors);
+
+    if (Object.values(nextErrors).every((error) => !error)) {
+      closeDialog();
+    }
+  }
+
+  function getInputClassName(hasError: boolean) {
+    const borderColor = hasError ? "border-[#D9583C]" : "border-[#EADFD0]";
+    return `${fieldBaseClassName} ${borderColor}`;
   }
 
   return (
@@ -95,7 +178,7 @@ export function AddKidDialog() {
 
         <form
           id="add-kid-form"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
           className="px-[26px] py-6"
         >
           <div className="mb-[18px]">
@@ -105,9 +188,18 @@ export function AddKidDialog() {
             <input
               id="kid-name"
               name="name"
+              value={formValues.name}
+              onChange={(event) => updateField("name", event.target.value)}
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "kid-name-error" : undefined}
               placeholder="Ej. Martina López"
-              className={fieldClassName}
+              className={getInputClassName(Boolean(errors.name))}
             />
+            {errors.name && (
+              <p id="kid-name-error" role="alert" className={errorMessageClassName}>
+                {errors.name}
+              </p>
+            )}
           </div>
 
           <div className="mb-[18px] grid grid-cols-2 gap-[14px]">
@@ -118,10 +210,20 @@ export function AddKidDialog() {
               <BirthDateInput
                 id="kid-birth-date"
                 name="birthDate"
-                value={birthDate}
-                onChange={setBirthDate}
-                className={fieldClassName}
+                value={formValues.birthDate}
+                onChange={(value) => updateField("birthDate", value)}
+                error={errors.birthDate}
+                className={getInputClassName(Boolean(errors.birthDate))}
               />
+              {errors.birthDate && (
+                <p
+                  id="kid-birth-date-error"
+                  role="alert"
+                  className={errorMessageClassName}
+                >
+                  {errors.birthDate}
+                </p>
+              )}
             </div>
 
             <div>
@@ -132,14 +234,30 @@ export function AddKidDialog() {
                 <select
                   id="kid-classroom"
                   name="classroom"
-                  defaultValue=""
-                  className={`${fieldClassName} appearance-none pr-10 font-bold`}
+                  value={formValues.classroom}
+                  onChange={(event) =>
+                    updateField("classroom", event.target.value)
+                  }
+                  aria-invalid={Boolean(errors.classroom)}
+                  aria-describedby={
+                    errors.classroom ? "kid-classroom-error" : undefined
+                  }
+                  className={`${getInputClassName(Boolean(errors.classroom))} appearance-none pr-10 font-bold`}
                 >
                   <option value="">Elegí una sala</option>
                   <option value="Soles">Soles</option>
                 </select>
                 <ChevronIcon />
               </div>
+              {errors.classroom && (
+                <p
+                  id="kid-classroom-error"
+                  role="alert"
+                  className={errorMessageClassName}
+                >
+                  {errors.classroom}
+                </p>
+              )}
             </div>
           </div>
 
@@ -150,8 +268,10 @@ export function AddKidDialog() {
             <input
               id="kid-allergies"
               name="allergies"
+              value={formValues.allergies}
+              onChange={(event) => updateField("allergies", event.target.value)}
               placeholder="Ej. Maní, Lactosa"
-              className={fieldClassName}
+              className={getInputClassName(false)}
             />
           </div>
 
@@ -162,8 +282,10 @@ export function AddKidDialog() {
             <textarea
               id="kid-notes"
               name="notes"
+              value={formValues.notes}
+              onChange={(event) => updateField("notes", event.target.value)}
               placeholder="Indicaciones, medicación, contactos…"
-              className={`${fieldClassName} min-h-[90px] resize-y leading-[1.5]`}
+              className={`${getInputClassName(false)} min-h-[90px] resize-y leading-[1.5]`}
             />
           </div>
         </form>

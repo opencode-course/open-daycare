@@ -7,6 +7,7 @@ type BirthDateInputProps = {
   name: string;
   value: string;
   className: string;
+  error?: string;
   onChange: (value: string) => void;
 };
 
@@ -91,6 +92,7 @@ export function BirthDateInput({
   name,
   value,
   className,
+  error,
   onChange,
 }: BirthDateInputProps) {
   function handleChange(raw: string) {
@@ -105,6 +107,8 @@ export function BirthDateInput({
       inputMode="numeric"
       autoComplete="bday"
       maxLength={10}
+      aria-invalid={Boolean(error)}
+      aria-describedby={error ? `${id}-error` : undefined}
       value={value}
       onChange={(event) => handleChange(event.target.value)}
       onPaste={(event) => {
