@@ -1,5 +1,6 @@
 import { currentUser } from "@/app/data/mock/feed";
 import Link from "next/link";
+import { NavLink } from "@/components/NavLink";
 
 type SidebarProps = {
   variant?: "desktop" | "drawer";
@@ -64,11 +65,7 @@ export function Sidebar({ variant = "desktop" }: SidebarProps) {
       </a>
 
       <nav className="flex flex-1 flex-col gap-1" aria-label="Navegación principal">
-        <Link
-          href="/"
-          aria-current="page"
-          className="flex items-center gap-3 rounded-xl bg-[#fbe3d8] px-3 py-[11px] text-[14.5px] font-extrabold text-[#d9583c]"
-        >
+        <NavLink href="/">
           <svg
             width="19"
             height="19"
@@ -83,11 +80,8 @@ export function Sidebar({ variant = "desktop" }: SidebarProps) {
             <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
           </svg>
           Feed
-        </Link>
-        <a
-          href="#"
-          className="flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] font-semibold text-[#6e6359]"
-        >
+        </NavLink>
+        <NavLink href="/kids">
           <svg
             width="19"
             height="19"
@@ -104,7 +98,7 @@ export function Sidebar({ variant = "desktop" }: SidebarProps) {
             <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 20a5 5 0 0 1 5.5-4.9" />
           </svg>
           Niños
-        </a>
+        </NavLink>
         <a
           href="#"
           className="flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] font-semibold text-[#6e6359]"
