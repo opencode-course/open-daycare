@@ -1,4 +1,4 @@
-import { postTypeLabels, type Post, type PostType } from "@/app/data/mock/feed";
+import { postTypeLabels, type Post, type PostType } from "@/features/feed/data";
 
 const badgeStyles: Record<PostType, { background: string; foreground: string }> = {
   achievement: { background: "bg-[#cfebd8]", foreground: "text-[#3e9b6c]" },

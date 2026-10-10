@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent, type MouseEvent } from "react";
-import { BirthDateInput, validateBirthDate } from "@/components/BirthDateInput";
+import { BirthDateInput, validateBirthDate } from "@/features/kids/components/BirthDateInput";
 
 const labelClassName =
   "mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted";

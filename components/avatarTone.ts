@@ -1,4 +1,4 @@
-import type { AvatarTone } from "@/app/data/mock/kids";
+import type { AvatarTone } from "@/shared/types/avatar";
 
 export const avatarToneClasses: Record<AvatarTone, string> = {
   sky: "bg-[#A9D9E8] text-[#1F7A93]",

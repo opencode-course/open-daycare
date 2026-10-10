@@ -1,6 +1,6 @@
-import { currentUser } from "@/app/data/mock/feed";
+import { currentUser } from "@/features/feed/data";
 import Link from "next/link";
-import { NavLink } from "@/components/NavLink";
+import { NavLink } from "@/components/layout/NavLink";
 
 type SidebarProps = {
   variant?: "desktop" | "drawer";
