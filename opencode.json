@@ -1,5 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "lsp": true,
+  "references": {
+    "docs": {
+      "path": "../07-DB-Schema",
+      "description": "Database Schema, tables, columns and relationships for the application, this is not implemented in the data base code but is used for reference and documentation purposes."
+    }
+  },
   "mcp": {
     "servers": {
       "playwright": {
@@ -9,6 +16,10 @@
           "-y",
           "@playwright/mcp@latest"
         ]
+      },
+      "supabase": {
+        "type": "remote",
+        "url": "https://mcp.supabase.com/mcp?project_ref=zealtwsejdmwpmfaokqu&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
       }
     }
   }
