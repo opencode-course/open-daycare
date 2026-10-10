@@ -31,7 +31,7 @@ Before the final response, run one reporting pass. If candidates remain, from th
 
 ## Project
 
-OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `@/*` maps to the repo root. UI copy is Spanish (Rioplatense); code identifiers are English. Backend/auth are not implemented yet; typed mocks currently live in each domain under `features/<domain>/data.ts`. Follow the feature-driven structure in `references/architectures/opendaycare.md`. Only built screens should get working routes; links to unbuilt screens use `href="#"` by design, don't "fix" them.
+OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `@/*` maps to the repo root. UI copy is Spanish (Rioplatense); code identifiers are English. Backend/auth are not implemented yet (Supabase is the backend stack — see the Supabase section); typed mocks currently live in each domain under `features/<domain>/data.ts`. Follow the feature-driven structure in `references/architectures/opendaycare.md`. Only built screens should get working routes; links to unbuilt screens use `href="#"` by design, don't "fix" them.
 
 ## Architecture
 
@@ -40,6 +40,14 @@ OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `
 - Shared UI/layout and truly cross-domain utilities/types belong in `components/` and `shared/`. Backend infrastructure shared across features belongs in `server/` (for example, database client/schema and session helpers).
 - Add `app/api/` Route Handlers only for endpoints consumed outside the app or for integrations/webhooks, not as a default home for feature mutations.
 - Read `references/architectures/opendaycare.md` for the full structure and placement rules.
+
+## Supabase
+
+- Backend stack: Supabase remote project (configured in `opencode.json`). No local `supabase/` dir or `@supabase/supabase-js` dependency yet — DB work (schema, migrations, queries, logs) goes through the Supabase MCP.
+- Schema changes and SQL run against the remote project — inspect existing tables before altering anything, and prefer local development/testing once a local stack exists.
+- Data model source of truth: `../07-DB-Schema/opendaycare-database-schema.md` (the `docs` project reference) — documentation only, not implemented migrations.
+- `SUPABASE_DB_PASSWORD` lives in `.env` (see `.env.template`); never commit or log secrets.
+- When the backend lands: shared DB client and session helpers belong in `server/`; feature-specific data access stays in `features/<domain>/`.
 
 ## Commands
 
@@ -69,6 +77,13 @@ OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `
 
 - Playwright: all artifacts stay in `.playwright-mcp/` (gitignored) — never in `public/` or `references/`.
 - Context7: use it for current framework docs.
+- Supabase (remote, configured in `opencode.json`): features docs, account, database, debugging, development, functions, branching. Use it for schema inspection, migrations, logs, and project management — SQL runs on the remote project's database.
+
+## Skills
+
+- Installed from `supabase/agent-skills`, tracked in `skills-lock.json`.
+- `supabase` — use for ANY Supabase task: products (Database, Auth, Edge Functions, Realtime, Storage), client libraries (`supabase-js`, `@supabase/ssr`), auth/session issues, CLI, schema changes, and debugging (HTTP/Postgres errors, RLS, timeouts, logs).
+- `supabase-postgres-best-practices` — load BEFORE writing or changing anything that lives in Postgres: tables, columns, types, schema design, migrations, RLS policies and tests, indexes, triggers, functions, queues (`pg_cron`, `pgmq`), vector search, and diagnosing slow queries/locks/bloat. Applies even for a one-column change.
 
 ## SDD
 
