@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Kid } from "@/app/data/mock/kids";
+import type { Kid } from "@/features/kids/data";
 import { avatarToneClasses } from "@/components/avatarTone";
 
 function getParentsLabel(count: number) {

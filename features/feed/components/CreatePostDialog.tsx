@@ -6,12 +6,12 @@ import {
   type FormEvent,
   type MouseEvent,
 } from "react";
-import { kids } from "@/app/data/mock/kids";
+import { kids } from "@/features/kids/data";
 import {
   currentUser,
   postTypeChipLabels,
   type PostType,
-} from "@/app/data/mock/feed";
+} from "@/features/feed/data";
 import { avatarToneClasses } from "@/components/avatarTone";
 
 const postTypeOrder: PostType[] = [

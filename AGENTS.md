@@ -31,7 +31,15 @@ Before the final response, run one reporting pass. If candidates remain, from th
 
 ## Project
 
-OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `@/*` maps to the repo root. UI copy is Spanish (Rioplatense); code identifiers are English. No auth or database — all data is typed static mocks in `app/data/mock/`. Only `/` (feed) is implemented; links to unbuilt screens use `href="#"` by design, don't "fix" them.
+OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `@/*` maps to the repo root. UI copy is Spanish (Rioplatense); code identifiers are English. Backend/auth are not implemented yet; typed mocks currently live in each domain under `features/<domain>/data.ts`. Follow the feature-driven structure in `references/architectures/opendaycare.md`. Only built screens should get working routes; links to unbuilt screens use `href="#"` by design, don't "fix" them.
+
+## Architecture
+
+- `app/` owns routing and route-specific composition; keep pages thin and put domain code in `features/<domain>/`.
+- Feature components, validation schemas, server actions, and data access belong to their feature. Add files/folders only when needed; do not create empty placeholders.
+- Shared UI/layout and truly cross-domain utilities/types belong in `components/` and `shared/`. Backend infrastructure shared across features belongs in `server/` (for example, database client/schema and session helpers).
+- Add `app/api/` Route Handlers only for endpoints consumed outside the app or for integrations/webhooks, not as a default home for feature mutations.
+- Read `references/architectures/opendaycare.md` for the full structure and placement rules.
 
 ## Commands
 

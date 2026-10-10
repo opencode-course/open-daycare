@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { kids } from "@/app/data/mock/kids";
-import { AddKidDialog } from "@/components/AddKidDialog";
-import { KidCard } from "@/components/KidCard";
+import { kids } from "@/features/kids/data";
+import { AddKidDialog } from "@/features/kids/components/AddKidDialog";
+import { KidCard } from "@/features/kids/components/KidCard";
 
 export const metadata: Metadata = {
   title: "Niños · OpenDayCare",

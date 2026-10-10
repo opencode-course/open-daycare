@@ -1,5 +1,5 @@
-import { MobileNavigation } from "@/components/MobileNavigation";
-import { Sidebar } from "@/components/Sidebar";
+import { MobileNavigation } from "@/components/layout/MobileNavigation";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (

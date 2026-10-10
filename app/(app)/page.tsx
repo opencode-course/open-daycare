@@ -1,6 +1,6 @@
-import { posts, room } from "@/app/data/mock/feed";
-import { CreatePostDialog } from "@/components/CreatePostDialog";
-import { PostCard } from "@/components/PostCard";
+import { posts, room } from "@/features/feed/data";
+import { CreatePostDialog } from "@/features/feed/components/CreatePostDialog";
+import { PostCard } from "@/features/feed/components/PostCard";
 
 export default function Home() {
   return (

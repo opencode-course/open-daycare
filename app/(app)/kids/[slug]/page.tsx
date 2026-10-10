@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LinkParentDialog } from "@/components/LinkParentDialog";
+import { LinkParentDialog } from "@/features/kids/components/LinkParentDialog";
 import {
   kidDetail,
   kids,
@@ -9,7 +9,7 @@ import {
   parentStatusLabels,
   parentStatusText,
   type AvatarTone,
-} from "@/app/data/mock/kids";
+} from "@/features/kids/data";
 
 type KidPageProps = {
   params: Promise<{ slug: string }>;

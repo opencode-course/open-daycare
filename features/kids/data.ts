@@ -1,4 +1,6 @@
-export type AvatarTone = "sky" | "rose" | "mint" | "sun" | "lilac" | "skySoft";
+import type { AvatarTone } from "@/shared/types/avatar";
+
+export type { AvatarTone } from "@/shared/types/avatar";
 export type ParentRole = "mother" | "father" | "tutor";
 export type ParentStatus = "active" | "pending";
 
