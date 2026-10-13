@@ -43,8 +43,9 @@ OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `
 
 ## Supabase
 
-- Backend stack: Supabase remote project (configured in `opencode.json`). No local `supabase/` dir or `@supabase/supabase-js` dependency yet — DB work (schema, migrations, queries, logs) goes through the Supabase MCP.
-- Schema changes and SQL run against the remote project — inspect existing tables before altering anything, and prefer local development/testing once a local stack exists.
+- Backend stack: Supabase remote project (configured in `opencode.json`). No `@supabase/supabase-js` dependency yet — DB work (schema, migrations, queries, logs) goes through the Supabase MCP.
+- **Mandatory migrations:** every persistent database change (DDL or DML, including schema, seed/data changes, RLS policies, indexes, and functions) must be applied as a named migration with Supabase MCP `apply_migration`, then mirrored locally in `supabase/migrations/<version>_<snake_case_name>.sql` using the exact version returned by MCP. Never make persistent changes through ad hoc `execute_sql`, Dashboard edits, or scripts; use `execute_sql` only for read-only inspection and verification. Never invent migration versions.
+- Before changing the remote database, inspect the existing tables. Schema changes and migrations run against the remote project; prefer local development/testing once a local stack exists.
 - Data model source of truth: `../07-DB-Schema/opendaycare-database-schema.md` (the `docs` project reference) — documentation only, not implemented migrations.
 - `SUPABASE_DB_PASSWORD` lives in `.env` (see `.env.template`); never commit or log secrets.
 - When the backend lands: shared DB client and session helpers belong in `server/`; feature-specific data access stays in `features/<domain>/`.
