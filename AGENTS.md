@@ -88,7 +88,7 @@ OpenDaycare — daycare management app. App Router in `app/`, no `src/`; alias `
 
 ## SDD
 
-- Features are developed with `/spec` (design) then `/spec-impl` (implementation). Specs live in `specs/` as `NN-slug.md`, written in Spanish; use `specs/01-feed-home.md` as the template.
+- Features are developed with `/spec` (design) then `/spec-impl` (implementation). Specs live in `specs/` as `NN-slug.md`, written in Spanish; database-related specs (schema, migrations, seed data, RLS, or database access) live in `specs/database/` as `NN-slug.md`. Keep one shared sequential numbering across both locations. Use `specs/01-feed-home.md` as the template.
 - Implement only when the spec's Estado is `Approved`. Acceptance criteria checkboxes are ticked only after verification — the `spec-verifier` agent (`.opencode/agents/`) can run that pass.
 
 ## Code rules
