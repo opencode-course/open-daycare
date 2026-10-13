@@ -1,6 +1,6 @@
 # SPEC 08 — Crear tabla users con enums y usuario staff de prueba
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 07
 > **Fecha:** 2026-10-13
 > **Objetivo:** Crear los enums `user_role` y `user_status` y la tabla `public.users` según el documento de schema, con RLS activado sin policies, y sembrar un usuario staff de prueba (`camilo@gmail.com`) vinculado a `auth.users` y a la guardería Sala Soles.
@@ -92,14 +92,14 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `supabase/migrations/` agrega exactamente dos archivos: `<versión>_create_users.sql` y `<versión>_seed_staff_user.sql`; `list_migrations` muestra ambas migraciones con las mismas versiones.
-- [ ] `list_tables` verbose muestra `public.users` con las diez columnas, PK en `id`, FK `id` → `auth.users(id)` con `ON DELETE CASCADE` y FK `daycare_id` → `daycares(id)`.
-- [ ] Existen en `public` los enums `user_role` (`staff`, `parent`, `admin`) y `user_status` (`pending`, `active`); `role` y `status` usan esos tipos, y `status` tiene default `active`.
-- [ ] RLS está activado en `users` y no hay policies; `get_advisors` no agrega hallazgos WARN/ERROR para esta tabla. Se acepta el aviso INFO `rls_enabled_no_policy`.
-- [ ] `execute_sql` confirma exactamente un usuario `camilo@gmail.com` en `auth.users`, con email confirmado y contraseña verificable mediante `encrypted_password = crypt('111222', encrypted_password)`.
-- [ ] `execute_sql` confirma exactamente una fila relacionada en `public.users`: rol `staff`, estado `active`, nombre `Camilo Dávila`, `avatar_url` nulo, ambos booleanos en `true`, guardería Sala Soles y el mismo UUID que `auth.users`.
-- [ ] El cambio local agrega únicamente los dos archivos de migración; no modifica `app/`, `components/`, `features/` ni `package.json`.
-- [ ] El SQL local de cada migración coincide con el SQL aplicado mediante MCP.
+- [x] `supabase/migrations/` agrega exactamente dos archivos: `<versión>_create_users.sql` y `<versión>_seed_staff_user.sql`; `list_migrations` muestra ambas migraciones con las mismas versiones.
+- [x] `list_tables` verbose muestra `public.users` con las diez columnas, PK en `id`, FK `id` → `auth.users(id)` con `ON DELETE CASCADE` y FK `daycare_id` → `daycares(id)`.
+- [x] Existen en `public` los enums `user_role` (`staff`, `parent`, `admin`) y `user_status` (`pending`, `active`); `role` y `status` usan esos tipos, y `status` tiene default `active`.
+- [x] RLS está activado en `users` y no hay policies; `get_advisors` no agrega hallazgos WARN/ERROR para esta tabla. Se acepta el aviso INFO `rls_enabled_no_policy`.
+- [x] `execute_sql` confirma exactamente un usuario `camilo@gmail.com` en `auth.users`, con email confirmado y contraseña verificable mediante `encrypted_password = crypt('111222', encrypted_password)`.
+- [x] `execute_sql` confirma exactamente una fila relacionada en `public.users`: rol `staff`, estado `active`, nombre `Camilo Dávila`, `avatar_url` nulo, ambos booleanos en `true`, guardería Sala Soles y el mismo UUID que `auth.users`.
+- [x] El cambio local agrega únicamente los dos archivos de migración; no modifica `app/`, `components/`, `features/` ni `package.json`.
+- [x] El SQL local de cada migración coincide con el SQL aplicado mediante MCP.
 
 ## Decisions
 

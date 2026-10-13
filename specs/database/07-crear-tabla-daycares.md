@@ -1,6 +1,6 @@
 # SPEC 07 — Crear tabla daycares con patrón de migraciones
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** — (primera spec de base de datos)
 > **Fecha:** 2026-10-10
 > **Objetivo:** Establecer el patrón de migraciones SQL versionadas en git y aplicadas vía Supabase MCP, creando la tabla `daycares` con RLS activado y seed de 4 guarderías.
