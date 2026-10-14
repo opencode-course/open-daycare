@@ -1,6 +1,6 @@
 # SPEC 09 — Autenticación real con Supabase: login, logout y protección de rutas
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 03, SPEC 07, SPEC 08
 > **Fecha:** 2026-10-13
 > **Objetivo:** Implementar login y logout reales contra Supabase Auth (email/contraseña), proteger las rutas de `(app)` con `proxy.ts` y verificación de sesión, y mostrar el usuario real en la UI.
@@ -94,20 +94,20 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] Login con `camilo@gmail.com` / `111222` navega a `/` con sesión iniciada; navegaciones posteriores a `/` no redirigen.
-- [ ] El sidebar (desktop y drawer) muestra «Camilo Dávila», «Staff · Sala Soles» y avatar «C»; el header de `/` muestra «GUARDERÍA · SALA SOLES» y «Buenas, Camilo».
-- [ ] Credenciales inválidas muestran «Email o contraseña incorrectos.» bajo el formulario, sin navegación.
-- [ ] Submit con email vacío muestra «Escribí tu email»; email inválido muestra «Ingresá un email válido»; contraseña vacía muestra «Escribí tu contraseña». La validación ocurre antes de llamar a `signInWithPassword`.
-- [ ] El error de un campo desaparece al editar ese campo.
-- [ ] Sin sesión, `/`, `/kids` y un perfil `/kids/[slug]` redirigen a `/auth/login` con cambio de URL visible.
-- [ ] Con sesión, `/auth/login` y `/auth/activate-account` redirigen a `/`.
-- [ ] «Cerrar sesión» limpia la sesión, redirige a `/auth/login` y una visita posterior a `/` vuelve a redirigir al login.
-- [ ] El botón «Iniciar sesión» queda deshabilitado mientras se procesa el formulario.
-- [ ] `supabase/migrations/` agrega `<versión>_add_auth_read_policies.sql`, `<versión>_repair_seed_auth_confirmation_token.sql` y `<versión>_repair_seed_auth_account.sql`; `list_migrations` muestra las tres versiones.
+- [x] Login con `camilo@gmail.com` / `111222` navega a `/` con sesión iniciada; navegaciones posteriores a `/` no redirigen.
+- [x] El sidebar (desktop y drawer) muestra «Camilo Dávila», «Staff · Sala Soles» y avatar «C»; el header de `/` muestra «GUARDERÍA · SALA SOLES» y «Buenas, Camilo».
+- [x] Credenciales inválidas muestran «Email o contraseña incorrectos.» bajo el formulario, sin navegación.
+- [x] Submit con email vacío muestra «Escribí tu email»; email inválido muestra «Ingresá un email válido»; contraseña vacía muestra «Escribí tu contraseña». La validación ocurre antes de llamar a `signInWithPassword`.
+- [x] El error de un campo desaparece al editar ese campo.
+- [x] Sin sesión, `/`, `/kids` y un perfil `/kids/[slug]` redirigen a `/auth/login` con cambio de URL visible.
+- [x] Con sesión, `/auth/login` y `/auth/activate-account` redirigen a `/`.
+- [x] «Cerrar sesión» limpia la sesión, redirige a `/auth/login` y una visita posterior a `/` vuelve a redirigir al login.
+- [x] El botón «Iniciar sesión» queda deshabilitado mientras se procesa el formulario.
+- [x] `supabase/migrations/` agrega `<versión>_add_auth_read_policies.sql`, `<versión>_repair_seed_auth_confirmation_token.sql` y `<versión>_repair_seed_auth_account.sql`; `list_migrations` muestra las tres versiones.
 - [ ] Las policies permiten al usuario autenticado leer únicamente su fila en `users` y consultar `daycares`; `get_advisors` no reporta hallazgos WARN/ERROR para estas policies.
-- [ ] `/auth/login` conserva el branding, copy, placeholders y comportamiento responsive de `references/pantallas/login.dc.html`.
-- [ ] El feed y `/kids` conservan los mocks sin cambios (3 posts, 8 niños).
-- [ ] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores durante los flujos.
+- [x] `/auth/login` conserva el branding, copy, placeholders y comportamiento responsive de `references/pantallas/login.dc.html`.
+- [x] El feed y `/kids` conservan los mocks sin cambios (3 posts, 8 niños).
+- [x] `npm run lint` y `npm run build` terminan correctamente y la consola no muestra errores durante los flujos.
 
 ## Decisions
 
@@ -139,7 +139,7 @@ Convenciones:
 | Los layouts no se re-renderizan en cada navegación parcial.                          | El proxy protege los requests; futuras lecturas y mutaciones de datos deben verificar autorización cerca de la fuente.                                     |
 | La policy de `daycares` permite lectura a cualquier usuario autenticado.             | Solo expone nombres de guarderías, necesarios para el encabezado; revisar si cambia la sensibilidad de estos datos.                                        |
 | Un usuario de Auth sin fila en `public.users` no tiene perfil de aplicación.         | El usuario sembrado por SPEC 08 ya tiene perfil; el flujo de activación futura debe crear la fila antes de habilitar el acceso.                            |
-| `auth.users` y `auth.identities` son tablas administradas por Supabase Auth.         | La reparación se limita a la cuenta de prueba existente; futuras cuentas deben crearse mediante Auth Admin API o Studio, no con inserts SQL.                |
+| `auth.users` y `auth.identities` son tablas administradas por Supabase Auth.         | La reparación se limita a la cuenta de prueba existente; futuras cuentas deben crearse mediante Auth Admin API o Studio, no con inserts SQL.               |
 | Una respuesta de redirect podría descartar cookies recién refrescadas.               | Copiar las cookies de la respuesta de `updateSession` a la respuesta de redirect y verificar la persistencia del login/logout.                             |
 
 ## What is **not** in this spec
