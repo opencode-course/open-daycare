@@ -8,7 +8,6 @@ import {
 } from "react";
 import { kids } from "@/features/kids/data";
 import {
-  currentUser,
   postTypeChipLabels,
   type PostType,
 } from "@/features/feed/data";
@@ -50,7 +49,12 @@ function createInitialFormValues(): CreatePostFormValues {
   };
 }
 
-export function CreatePostDialog() {
+type CreatePostDialogProps = {
+  name: string;
+  initials: string;
+};
+
+export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [formValues, setFormValues] = useState(createInitialFormValues);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -129,10 +133,11 @@ export function CreatePostDialog() {
       <button
         type="button"
         onClick={openDialog}
+        aria-label={`Compartí un momento como ${name}`}
         className="mb-6 flex w-full items-center gap-[14px] rounded-[18px] border border-border bg-surface px-[18px] py-[14px] text-left shadow-[0_4px_14px_-10px_rgba(120,90,60,0.4)]"
       >
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent font-heading text-base font-semibold text-white">
-          {currentUser.initials}
+          {initials}
         </span>
         <span className="flex-1 text-[15px] text-[#a89a8b]">
           Compartí un momento…

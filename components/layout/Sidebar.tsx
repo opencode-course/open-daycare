@@ -1,12 +1,21 @@
-import { currentUser } from "@/features/feed/data";
 import Link from "next/link";
 import { NavLink } from "@/components/layout/NavLink";
 
 type SidebarProps = {
+  name: string;
+  initials: string;
+  subtitle: string;
+  logoutAction: () => Promise<void>;
   variant?: "desktop" | "drawer";
 };
 
-export function Sidebar({ variant = "desktop" }: SidebarProps) {
+export function Sidebar({
+  name,
+  initials,
+  subtitle,
+  logoutAction,
+  variant = "desktop",
+}: SidebarProps) {
   const containerClassName =
     variant === "desktop"
       ? "sticky top-0 flex h-screen w-[248px] shrink-0 flex-col border-r border-border bg-surface px-4 py-6"
@@ -143,34 +152,36 @@ export function Sidebar({ variant = "desktop" }: SidebarProps) {
       <div className="mt-[10px] border-t border-border pt-[14px]">
         <div className="flex items-center gap-[11px] px-2 py-1.5">
           <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-accent font-heading text-base font-semibold text-white">
-            {currentUser.initials}
+            {initials}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-extrabold text-foreground">
-              {currentUser.name}
+              {name}
             </span>
-            <span className="block text-xs text-muted">{currentUser.role}</span>
+            <span className="block text-xs text-muted">{subtitle}</span>
           </span>
-          <a
-            href="#"
-            title="Cerrar sesión"
-            aria-label="Cerrar sesión"
-            className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-background text-muted"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          <form action={logoutAction} className="shrink-0">
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="flex size-8 items-center justify-center rounded-[10px] bg-background text-muted"
             >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-          </a>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+            </button>
+          </form>
         </div>
       </div>
     </aside>
