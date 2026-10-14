@@ -10,6 +10,8 @@
 **In:**
 
 - Migración `add_auth_read_policies` vía Supabase MCP `apply_migration`: policy de select en `public.users` para la fila propia (`auth.uid() = id`, rol `authenticated`) y policy de select en `public.daycares` para `authenticated`; espejo local en `supabase/migrations/<versión>_add_auth_read_policies.sql` con la versión exacta devuelta por MCP, según el patrón de SPEC 07/08.
+- Migración `repair_seed_auth_confirmation_token` vía Supabase MCP `apply_migration`: reemplazar `NULL` por cadena vacía en `auth.users.confirmation_token` para la cuenta de prueba sembrada; espejo local con la versión exacta devuelta por MCP. La fila incompleta causaba HTTP 500 en Supabase Auth al iniciar sesión.
+- Migración `repair_seed_auth_account` vía Supabase MCP `apply_migration`: completar campos de texto opcionales nulos de la cuenta de prueba y crear su identidad `email` faltante en `auth.identities`; espejo local con la versión exacta devuelta por MCP. Los inserts manuales previos en `auth.users` omitieron datos requeridos por el flujo real de Auth.
 - `features/auth/` (nueva feature): `schema.ts` (validación manual email/contraseña), `actions.ts` (`loginAction` con `signInWithPassword` y redirect a `/`; `logoutAction` con `signOut` y redirect a `/auth/login`) y `components/LoginForm.tsx` (client, `useActionState`).
 - `app/auth/login/page.tsx`: mantiene el panel de branding y estilos de SPEC 03; la columna del formulario pasa a `<LoginForm />` (inputs con placeholders del mockup, «¿Olvidaste tu contraseña?» sigue `href="#"`, botón «Iniciar sesión» pasa a ser submit con el mismo estilo de gradiente y queda deshabilitado mientras envía).
 - Errores del login: inline bajo cada campo («Escribí tu email», «Ingresá un email válido», «Escribí tu contraseña»), se limpian al tipear en el campo; credenciales inválidas muestran «Email o contraseña incorrectos.» bajo el formulario, sin revelar si el email existe.
@@ -83,7 +85,7 @@ Convenciones:
 
 ## Implementation plan
 
-1. Inspeccionar las tablas y policies remotas de `public.users` y `public.daycares`. Aplicar vía Supabase MCP `apply_migration` la migración `add_auth_read_policies`; registrar la versión devuelta, crear el archivo local con el SQL exacto y verificar `list_migrations`, las policies y `get_advisors` de seguridad.
+1. Inspeccionar las tablas y policies remotas de `public.users` y `public.daycares`. Aplicar vía Supabase MCP `apply_migration` las migraciones `add_auth_read_policies`, `repair_seed_auth_confirmation_token` y `repair_seed_auth_account`; registrar las versiones devueltas, crear los archivos locales con el SQL exacto y verificar `list_migrations`, las policies y `get_advisors` de seguridad.
 2. Extender `server/auth/session.ts`: `updateSession` devuelve `{ response, user }`; agregar `SessionUser`, `getCurrentUser` (React `cache()`) y `requireUser`. Manual: `npm run build` pasa; todavía nada lo consume.
 3. Crear `features/auth/schema.ts`, `features/auth/actions.ts` y `features/auth/components/LoginForm.tsx`; componer el formulario en `app/auth/login/page.tsx` sin alterar branding ni estilos. Manual: login con `camilo@gmail.com` / `111222` → `/`; credenciales incorrectas y campos inválidos muestran los mensajes acordados.
 4. Agregar protección en `proxy.ts` usando la sesión obtenida por `updateSession`: sin sesión fuera de `/auth/*` → `/auth/login`; con sesión en `/auth/*` → `/`. Conservar las cookies de sesión refrescadas en las respuestas de redirect. Manual: navegación anónima a `/` y `/kids` redirige al login; con sesión, `/auth/login` redirige a `/`.
@@ -101,7 +103,7 @@ Convenciones:
 - [ ] Con sesión, `/auth/login` y `/auth/activate-account` redirigen a `/`.
 - [ ] «Cerrar sesión» limpia la sesión, redirige a `/auth/login` y una visita posterior a `/` vuelve a redirigir al login.
 - [ ] El botón «Iniciar sesión» queda deshabilitado mientras se procesa el formulario.
-- [ ] `supabase/migrations/` agrega exactamente un archivo `<versión>_add_auth_read_policies.sql` y `list_migrations` muestra esa misma versión.
+- [ ] `supabase/migrations/` agrega `<versión>_add_auth_read_policies.sql`, `<versión>_repair_seed_auth_confirmation_token.sql` y `<versión>_repair_seed_auth_account.sql`; `list_migrations` muestra las tres versiones.
 - [ ] Las policies permiten al usuario autenticado leer únicamente su fila en `users` y consultar `daycares`; `get_advisors` no reporta hallazgos WARN/ERROR para estas policies.
 - [ ] `/auth/login` conserva el branding, copy, placeholders y comportamiento responsive de `references/pantallas/login.dc.html`.
 - [ ] El feed y `/kids` conservan los mocks sin cambios (3 posts, 8 niños).
@@ -116,6 +118,8 @@ Convenciones:
 - **Sí:** reutilizar la infraestructura existente: `proxy.ts`, `updateSession`, `server/db/client.ts` y `shared/lib/supabase-env.ts`.
 - **Sí:** `getCurrentUser` usa React `cache()` para deduplicar lecturas durante el mismo render.
 - **Sí:** policies RLS de lectura para la fila propia en `users` y para `daycares`, requerido por el perfil y el nombre de guardería.
+- **Sí:** migración de reparación para dejar `auth.users.confirmation_token` de la cuenta de prueba como cadena vacía; el `NULL` sembrado causaba un error 500 al autenticar.
+- **Sí:** completar los campos opcionales nulos y crear la identidad de email faltante de la cuenta de prueba; los logs mostraron que el seed manual incompleto impedía el login.
 - **Sí:** `Sidebar` y `CreatePostDialog` reciben props simples (`name`, `initials`, `subtitle`) y no importan módulos server-only.
 - **Sí:** logout mediante Server Action desde el botón existente del sidebar.
 - **No:** `zod`/`valibot`; validación manual sin dependencia nueva.
@@ -133,6 +137,7 @@ Convenciones:
 | Los layouts no se re-renderizan en cada navegación parcial.                          | El proxy protege los requests; futuras lecturas y mutaciones de datos deben verificar autorización cerca de la fuente.                                     |
 | La policy de `daycares` permite lectura a cualquier usuario autenticado.             | Solo expone nombres de guarderías, necesarios para el encabezado; revisar si cambia la sensibilidad de estos datos.                                        |
 | Un usuario de Auth sin fila en `public.users` no tiene perfil de aplicación.         | El usuario sembrado por SPEC 08 ya tiene perfil; el flujo de activación futura debe crear la fila antes de habilitar el acceso.                            |
+| `auth.users` y `auth.identities` son tablas administradas por Supabase Auth.         | La reparación se limita a la cuenta de prueba existente; futuras cuentas deben crearse mediante Auth Admin API o Studio, no con inserts SQL.                |
 | Una respuesta de redirect podría descartar cookies recién refrescadas.               | Copiar las cookies de la respuesta de `updateSession` a la respuesta de redirect y verificar la persistencia del login/logout.                             |
 
 ## What is **not** in this spec
