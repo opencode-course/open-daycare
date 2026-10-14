@@ -5,6 +5,12 @@ import {
   allergyTagLabels,
 } from "@/features/kids/schema";
 import type { AvatarTone } from "@/shared/types/avatar";
+import {
+  roleByRelationship,
+  type ParentLink,
+  type ParentStatus,
+  type RelationshipType,
+} from "@/features/kids/parent";
 
 export {
   parentRoleLabels,
@@ -49,6 +55,16 @@ type KidRow = {
   allergy_tags: string[] | null;
   medical_notes: string | null;
   room: { name: string } | { name: string }[] | null;
+};
+
+type ParentChildRow = {
+  relationship: RelationshipType;
+  parent: { full_name: string } | { full_name: string }[] | null;
+};
+
+type InvitationRow = {
+  full_name: string;
+  relationship: RelationshipType;
 };
 
 const avatarTones: readonly AvatarTone[] = [
@@ -126,6 +142,53 @@ export async function getKidById(id: string): Promise<Kid | null> {
   return data ? mapKidRow(data as KidRow) : null;
 }
 
+export async function getParentsForKid(childId: string): Promise<ParentLink[]> {
+  if (!isUuid(childId)) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const [activeResult, pendingResult] = await Promise.all([
+    supabase
+      .from("parent_children")
+      .select(
+        "relationship, parent:users!parent_children_parent_id_fkey(full_name)",
+      )
+      .eq("child_id", childId),
+    supabase
+      .from("invitations")
+      .select("full_name, relationship")
+      .eq("child_id", childId)
+      .eq("status", "pending")
+      .gt("expires_at", new Date().toISOString()),
+  ]);
+
+  if (activeResult.error) {
+    throw activeResult.error;
+  }
+
+  if (pendingResult.error) {
+    throw pendingResult.error;
+  }
+
+  const activeParents = ((activeResult.data ?? []) as ParentChildRow[])
+    .map((row) => {
+      const parent = Array.isArray(row.parent) ? row.parent[0] : row.parent;
+
+      return parent
+        ? mapParentLink(parent.full_name, row.relationship, "active")
+        : null;
+    })
+    .filter((parent): parent is ParentLink => parent !== null)
+    .sort(compareParentNames);
+
+  const pendingParents = ((pendingResult.data ?? []) as InvitationRow[])
+    .map((row) => mapParentLink(row.full_name, row.relationship, "pending"))
+    .sort(compareParentNames);
+
+  return [...activeParents, ...pendingParents];
+}
+
 function mapKidRow(row: KidRow): Kid {
   const room = Array.isArray(row.room) ? row.room[0] : row.room;
   const fullName = row.full_name.trim();
@@ -144,6 +207,26 @@ function mapKidRow(row: KidRow): Kid {
     enrolledAt: formatEnrollmentDate(row.enrolled_at),
     medicalNotes: row.medical_notes,
   };
+}
+
+function mapParentLink(
+  name: string,
+  relationship: RelationshipType,
+  status: ParentStatus,
+): ParentLink {
+  const fullName = name.trim();
+
+  return {
+    name: fullName,
+    avatarInitial: fullName.charAt(0).toLocaleUpperCase("es"),
+    avatarTone: getAvatarTone(fullName),
+    role: roleByRelationship[relationship],
+    status,
+  };
+}
+
+function compareParentNames(first: ParentLink, second: ParentLink): number {
+  return first.name.localeCompare(second.name, "es");
 }
 
 function calculateAge(birthDate: string): number {
