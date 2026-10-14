@@ -2,6 +2,19 @@ import type { AvatarTone } from "@/shared/types/avatar";
 
 export type ParentRole = "mother" | "father" | "tutor";
 export type ParentStatus = "active" | "pending";
+export type RelationshipType = "father" | "mother" | "guardian";
+
+export const relationshipByRole: Record<ParentRole, RelationshipType> = {
+  mother: "mother",
+  father: "father",
+  tutor: "guardian",
+};
+
+export const roleByRelationship: Record<RelationshipType, ParentRole> = {
+  mother: "mother",
+  father: "father",
+  guardian: "tutor",
+};
 
 export type ParentLink = {
   name: string;
