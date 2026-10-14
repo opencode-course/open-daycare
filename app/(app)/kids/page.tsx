@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { kids } from "@/features/kids/data";
+import { kids } from "@/features/kids/mock-data";
 import { AddKidDialog } from "@/features/kids/components/AddKidDialog";
 import { KidCard } from "@/features/kids/components/KidCard";
 

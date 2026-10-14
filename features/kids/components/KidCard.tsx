@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Kid } from "@/features/kids/data";
+import type { MockKid } from "@/features/kids/mock-data";
 import { avatarToneClasses } from "@/components/avatarTone";
 
 function getParentsLabel(count: number) {
@@ -27,7 +27,7 @@ function ChevronIcon() {
   );
 }
 
-export function KidCard({ kid }: { kid: Kid }) {
+export function KidCard({ kid }: { kid: MockKid }) {
   const hasAllergies = kid.allergies.length > 0;
   const hasBadges = hasAllergies || kid.parentsCount === 0;
 

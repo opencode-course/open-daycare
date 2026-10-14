@@ -5,11 +5,13 @@ import { LinkParentDialog } from "@/features/kids/components/LinkParentDialog";
 import {
   kidDetail,
   kids,
+} from "@/features/kids/mock-data";
+import {
   parentRoleLabels,
   parentStatusLabels,
   parentStatusText,
-  type AvatarTone,
-} from "@/features/kids/data";
+} from "@/features/kids/parent";
+import type { AvatarTone } from "@/shared/types/avatar";
 
 type KidPageProps = {
   params: Promise<{ slug: string }>;
