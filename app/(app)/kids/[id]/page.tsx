@@ -179,7 +179,7 @@ export default async function KidProfilePage({ params }: KidPageProps) {
             <h2 className="mb-[14px] text-[12.5px] font-extrabold tracking-[0.8px] text-[#8A7C6D]">
               PADRES VINCULADOS
             </h2>
-            <LinkParentDialog kidName={kid.fullName} />
+            <LinkParentDialog childId={kid.id} kidName={kid.fullName} />
           </section>
         </aside>
       </div>
