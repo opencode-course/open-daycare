@@ -35,3 +35,10 @@ export async function loginAction(
 
   redirect("/");
 }
+
+export async function logoutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+
+  redirect("/auth/login");
+}

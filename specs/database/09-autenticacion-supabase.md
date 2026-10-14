@@ -89,7 +89,7 @@ Convenciones:
 2. Extender `server/auth/session.ts`: `updateSession` devuelve `{ response, user }`; agregar `SessionUser`, `getCurrentUser` (React `cache()`) y `requireUser`. Manual: `npm run build` pasa; todavía nada lo consume.
 3. Crear `features/auth/schema.ts`, `features/auth/actions.ts` y `features/auth/components/LoginForm.tsx`; componer el formulario en `app/auth/login/page.tsx` sin alterar branding ni estilos. Manual: login con `camilo@gmail.com` / `111222` → `/`; credenciales incorrectas y campos inválidos muestran los mensajes acordados.
 4. Agregar protección en `proxy.ts` usando la sesión obtenida por `updateSession`: sin sesión fuera de `/auth/*` → `/auth/login`; con sesión en `/auth/*` → `/`. Conservar las cookies de sesión refrescadas en las respuestas de redirect. Manual: navegación anónima a `/` y `/kids` redirige al login; con sesión, `/auth/login` redirige a `/`.
-5. Integrar el usuario real en `app/(app)/layout.tsx` y `app/(app)/page.tsx`; pasar props a `Sidebar` y `CreatePostDialog`, quitar `currentUser` mock y convertir el botón de logout en form con Server Action. Manual: el sidebar muestra «Camilo Dávila» / «Staff · Sala Soles», el saludo muestra «Buenas, Camilo» y logout devuelve a `/auth/login`.
+5. Integrar el usuario real en `app/(app)/layout.tsx` y `app/(app)/page.tsx`; marcar ambos segmentos con `instant = false` y usar `connection()` antes de leer la sesión, pasar props a `Sidebar` y `CreatePostDialog`, quitar `currentUser` mock y convertir el botón de logout en form con Server Action. Manual: el sidebar muestra «Camilo Dávila» / «Staff · Sala Soles», el saludo muestra «Buenas, Camilo» y logout devuelve a `/auth/login`.
 6. Validar flujos con Playwright (login válido/inválido/vacío, protección de `/`, `/kids` y un perfil, redirects con sesión activa, logout y reprotección), comparar `/auth/login` con `references/pantallas/login.dc.html` en desktop y 375px, ejecutar `npm run lint` y `npm run build`.
 
 ## Acceptance criteria
@@ -115,6 +115,7 @@ Convenciones:
 - **Sí:** `useActionState` con errores inline y mensaje genérico «Email o contraseña incorrectos.» para no revelar si el email existe.
 - **Sí:** protección en dos capas: `proxy.ts` refresca/verifica la sesión en cada request; `requireUser()` valida al obtener el usuario para renderizar la experiencia autenticada.
 - **Sí:** `export const instant = false` en `app/(app)/layout.tsx` para permitir el chequeo de sesión con `cacheComponents`.
+- **Sí:** `connection()` antes de `requireUser()` en layout y página protegidos; `getUser()` usa `Date.now()` y debe ejecutarse durante request, no prerenderizarse con `cacheComponents`.
 - **Sí:** reutilizar la infraestructura existente: `proxy.ts`, `updateSession`, `server/db/client.ts` y `shared/lib/supabase-env.ts`.
 - **Sí:** `getCurrentUser` usa React `cache()` para deduplicar lecturas durante el mismo render.
 - **Sí:** policies RLS de lectura para la fila propia en `users` y para `daycares`, requerido por el perfil y el nombre de guardería.
@@ -134,6 +135,7 @@ Convenciones:
 | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `getUser()` en el proxy agrega una llamada a Auth por request.                       | Se usa para validar/actualizar la sesión según el patrón SSR de Supabase; mantener matcher acotado a rutas de la aplicación si el costo resulta relevante. |
 | `cacheComponents` y la lectura de sesión pueden afectar el prerenderizado del shell. | Marcar el layout protegido con `export const instant = false` y verificar `npm run build`.                                                                 |
+| Supabase Auth lee `Date.now()` durante `getUser()` en segmentos protegidos.          | Marcar layout y página con `instant = false` y ejecutar `connection()` antes de `requireUser()` para diferir la lectura hasta request.                     |
 | Los layouts no se re-renderizan en cada navegación parcial.                          | El proxy protege los requests; futuras lecturas y mutaciones de datos deben verificar autorización cerca de la fuente.                                     |
 | La policy de `daycares` permite lectura a cualquier usuario autenticado.             | Solo expone nombres de guarderías, necesarios para el encabezado; revisar si cambia la sensibilidad de estos datos.                                        |
 | Un usuario de Auth sin fila en `public.users` no tiene perfil de aplicación.         | El usuario sembrado por SPEC 08 ya tiene perfil; el flujo de activación futura debe crear la fila antes de habilitar el acceso.                            |
