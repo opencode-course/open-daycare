@@ -1,8 +1,16 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type MouseEvent } from "react";
+import {
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
+import { addKidAction, type AddKidActionResult } from "@/features/kids/actions";
 import { BirthDateInput } from "@/features/kids/components/BirthDateInput";
-import { validateBirthDate } from "@/features/kids/schema";
+import { validateAddKid, type AddKidValues } from "@/features/kids/schema";
+import type { Room } from "@/features/kids/data";
 
 const labelClassName =
   "mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted";
@@ -10,49 +18,13 @@ const fieldBaseClassName =
   "w-full rounded-[14px] border-[1.5px] bg-white px-4 py-[13px] text-[15px] text-foreground outline-none placeholder:text-[#B6A99B]";
 const errorMessageClassName = "mt-1.5 text-[12px] leading-snug text-[#D9583C]";
 
-type AddKidFormValues = {
-  name: string;
-  birthDate: string;
-  classroom: string;
-  allergies: string;
-  notes: string;
-};
-
-type RequiredField = "name" | "birthDate" | "classroom";
-type AddKidErrors = Partial<Record<RequiredField, string>>;
-const initialFormValues: AddKidFormValues = {
+const initialFormValues: AddKidValues = {
   name: "",
   birthDate: "",
   classroom: "",
   allergies: "",
   notes: "",
 };
-
-function getFieldError(field: RequiredField, value: string): string | null {
-  if (field === "name") {
-    return value.trim() ? null : "Ingresá el nombre";
-  }
-
-  if (field === "classroom") {
-    return value ? null : "Elegí una sala";
-  }
-
-  const birthDateError = validateBirthDate(value);
-
-  if (birthDateError === "empty") {
-    return "Ingresá la fecha de nacimiento";
-  }
-
-  if (birthDateError === "invalid") {
-    return "La fecha no es válida";
-  }
-
-  if (birthDateError === "future") {
-    return "La fecha no puede ser posterior a hoy";
-  }
-
-  return null;
-}
 
 function PlusIcon() {
   return (
@@ -88,10 +60,12 @@ function ChevronIcon() {
   );
 }
 
-export function AddKidDialog() {
+export function AddKidDialog({ rooms }: { rooms: Room[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [formValues, setFormValues] = useState(initialFormValues);
-  const [errors, setErrors] = useState<AddKidErrors>({});
+  const [errors, setErrors] = useState<AddKidActionResult["errors"]>({});
+  const [formError, setFormError] = useState<string>();
+  const [isPending, startTransition] = useTransition();
 
   function openDialog() {
     dialogRef.current?.showModal();
@@ -110,20 +84,22 @@ export function AddKidDialog() {
   function handleClose() {
     setFormValues(initialFormValues);
     setErrors({});
+    setFormError(undefined);
   }
 
-  function updateField(field: keyof AddKidFormValues, value: string) {
+  function updateField(field: keyof AddKidValues, value: string) {
     setFormValues((currentValues) => ({ ...currentValues, [field]: value }));
+    setFormError(undefined);
 
-    if (field === "name" || field === "birthDate" || field === "classroom") {
+    if (
+      (field === "name" || field === "birthDate" || field === "classroom") &&
+      errors[field]
+    ) {
+      const nextErrors = validateAddKid({ ...formValues, [field]: value });
       setErrors((currentErrors) => {
-        if (!currentErrors[field]) {
-          return currentErrors;
-        }
-
         return {
           ...currentErrors,
-          [field]: getFieldError(field, value) ?? undefined,
+          [field]: nextErrors[field],
         };
       });
     }
@@ -132,17 +108,23 @@ export function AddKidDialog() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextErrors: AddKidErrors = {
-      name: getFieldError("name", formValues.name) ?? undefined,
-      birthDate: getFieldError("birthDate", formValues.birthDate) ?? undefined,
-      classroom: getFieldError("classroom", formValues.classroom) ?? undefined,
-    };
+    const nextErrors = validateAddKid(formValues);
 
     setErrors(nextErrors);
 
-    if (Object.values(nextErrors).every((error) => !error)) {
-      closeDialog();
+    if (Object.values(nextErrors).some(Boolean)) {
+      return;
     }
+
+    startTransition(async () => {
+      const result = await addKidAction(formValues);
+      setErrors(result.errors);
+      setFormError(result.formError);
+
+      if (result.success) {
+        closeDialog();
+      }
+    });
   }
 
   function getInputClassName(hasError: boolean) {
@@ -172,6 +154,7 @@ export function AddKidDialog() {
           <button
             type="button"
             onClick={closeDialog}
+            disabled={isPending}
             className="text-[15px] font-bold text-muted"
           >
             Cancelar
@@ -185,6 +168,7 @@ export function AddKidDialog() {
           <button
             type="submit"
             form="add-kid-form"
+            disabled={isPending}
             className="text-[15px] font-extrabold text-[#D9583C]"
           >
             Guardar
@@ -196,6 +180,12 @@ export function AddKidDialog() {
           onSubmit={handleSubmit}
           className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-6"
         >
+          {formError && (
+            <p role="alert" className={`${errorMessageClassName} mb-4`}>
+              {formError}
+            </p>
+          )}
+
           <div className="mb-[18px]">
             <label htmlFor="kid-name" className={labelClassName}>
               NOMBRE COMPLETO
@@ -260,7 +250,11 @@ export function AddKidDialog() {
                   className={`${getInputClassName(Boolean(errors.classroom))} appearance-none px-2 pr-6 text-[13px] font-bold sm:px-4 sm:pr-10 sm:text-[15px]`}
                 >
                   <option value="">Elegí una sala</option>
-                  <option value="Soles">Soles</option>
+                  {rooms.map((room) => (
+                    <option key={room.id} value={room.id}>
+                      {room.name}
+                    </option>
+                  ))}
                 </select>
                 <ChevronIcon />
               </div>
