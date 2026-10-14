@@ -1,6 +1,6 @@
 # SPEC 11 — Vinculación real de padres: invitaciones con código y activación de cuenta
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 05, SPEC 09, SPEC 10
 > **Fecha:** 2026-10-14
 > **Objetivo:** Crear `invitations` y `parent_children` con RLS, generar y persistir el código al enviar la invitación desde el diálogo de `/kids/[id]`, y activar la cuenta del padre con ese código en `/auth/activate-account` (email, contraseña y consentimiento de fotos), dejando la sesión iniciada y al padre visible en PADRES VINCULADOS.
