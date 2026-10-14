@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { kids } from "@/features/kids/data";
+import { connection } from "next/server";
+import { getKids, getRooms } from "@/features/kids/data";
 import { AddKidDialog } from "@/features/kids/components/AddKidDialog";
 import { KidCard } from "@/features/kids/components/KidCard";
 
@@ -25,7 +26,12 @@ function SearchIcon() {
   );
 }
 
-export default function KidsPage() {
+export const instant = false;
+
+export default async function KidsPage() {
+  await connection();
+  const [kids, rooms] = await Promise.all([getKids(), getRooms()]);
+
   return (
     <div className="mx-auto w-full max-w-[880px] px-5 pb-20 pt-[34px] sm:px-10">
       <header className="mb-[22px] flex items-end justify-between gap-4">
@@ -38,7 +44,7 @@ export default function KidsPage() {
           </h1>
         </div>
 
-        <AddKidDialog />
+        <AddKidDialog rooms={rooms} />
       </header>
 
       <div className="mb-[22px] flex items-center gap-[11px] rounded-[14px] border border-border bg-surface px-4 py-3">
@@ -55,7 +61,9 @@ export default function KidsPage() {
         <span className="text-[12.5px] font-extrabold tracking-[0.8px] text-foreground">
           SALA SOLES
         </span>
-        <span className="text-[13px] text-muted">{kids.length} niños</span>
+        <span className="text-[13px] text-muted">
+          {kids.length} {kids.length === 1 ? "niño" : "niños"}
+        </span>
         <span aria-hidden="true" className="h-px flex-1 bg-[#E7DAC8]" />
       </div>
 
@@ -64,7 +72,7 @@ export default function KidsPage() {
         className="grid grid-cols-1 gap-[14px] sm:grid-cols-2"
       >
         {kids.map((kid) => (
-          <KidCard key={kid.slug} kid={kid} />
+          <KidCard key={kid.id} kid={kid} />
         ))}
       </section>
     </div>

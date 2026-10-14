@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent, type MouseEvent } from "react";
-import { parentRoleLabels, type ParentRole } from "@/features/kids/data";
+import { parentRoleLabels, type ParentRole } from "@/features/kids/parent";
 
 const parentRoles: ParentRole[] = ["mother", "father", "tutor"];
 const fieldBaseClassName =

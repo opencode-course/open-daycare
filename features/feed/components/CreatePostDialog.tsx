@@ -6,7 +6,7 @@ import {
   type FormEvent,
   type MouseEvent,
 } from "react";
-import { kids } from "@/features/kids/data";
+import { kids } from "@/features/kids/mock-data";
 import {
   postTypeChipLabels,
   type PostType,
