@@ -5,6 +5,7 @@ import {
   allergyTagLabels,
 } from "@/features/kids/schema";
 import type { AvatarTone } from "@/shared/types/avatar";
+import { getAvatarInitial, getAvatarTone } from "@/shared/lib/avatar";
 import {
   roleByRelationship,
   type ParentLink,
@@ -66,15 +67,6 @@ type InvitationRow = {
   full_name: string;
   relationship: RelationshipType;
 };
-
-const avatarTones: readonly AvatarTone[] = [
-  "sky",
-  "rose",
-  "mint",
-  "sun",
-  "lilac",
-  "skySoft",
-];
 
 const spanishMonths = [
   "ene",
@@ -196,7 +188,7 @@ function mapKidRow(row: KidRow): Kid {
   return {
     id: row.id,
     fullName,
-    avatarInitial: fullName.charAt(0).toLocaleUpperCase("es"),
+    avatarInitial: getAvatarInitial(fullName),
     avatarTone: getAvatarTone(fullName),
     age: calculateAge(row.birth_date),
     allergyTags: (row.allergy_tags ?? []).map(
@@ -218,7 +210,7 @@ function mapParentLink(
 
   return {
     name: fullName,
-    avatarInitial: fullName.charAt(0).toLocaleUpperCase("es"),
+    avatarInitial: getAvatarInitial(fullName),
     avatarTone: getAvatarTone(fullName),
     role: roleByRelationship[relationship],
     status,
@@ -237,16 +229,6 @@ function calculateAge(birthDate: string): number {
     (today.getMonth() + 1 === month && today.getDate() >= day);
 
   return today.getFullYear() - year - (hasBirthdayPassed ? 0 : 1);
-}
-
-function getAvatarTone(fullName: string): AvatarTone {
-  let hash = 0;
-
-  for (let index = 0; index < fullName.length; index += 1) {
-    hash = (hash * 31 + fullName.charCodeAt(index)) >>> 0;
-  }
-
-  return avatarTones[hash % avatarTones.length];
 }
 
 function formatBirthDate(date: string): string {
