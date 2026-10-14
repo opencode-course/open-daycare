@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  validateBirthDate,
-  type BirthDateError,
-} from "@/features/kids/schema";
-
 type BirthDateInputProps = {
   id: string;
   name: string;
