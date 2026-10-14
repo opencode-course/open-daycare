@@ -1,6 +1,6 @@
 # SPEC 10 — Mantenimiento de niños con salas y datos reales
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 02, SPEC 04, SPEC 07, SPEC 08, SPEC 09
 > **Fecha:** 2026-10-14
 > **Objetivo:** Crear `rooms` y `children`, sembrar tres salas para Sala Soles e integrar `/kids` con listado, alta y perfil reales contra Supabase.
@@ -117,19 +117,19 @@ Policies previstas (ajustar el SQL final tras inspeccionar el schema remoto):
 
 ## Acceptance criteria
 
-- [ ] `supabase/migrations/` contiene cuatro migraciones nuevas: `create_rooms`, `create_children`, `seed_rooms` y `add_rooms_children_policies`; las versiones coinciden con `list_migrations`.
-- [ ] `rooms` y `children` tienen columnas, tipos, claves foráneas y defaults según el schema; existe `child_status` con `active` y `archived`.
-- [ ] Existen los índices `rooms_daycare_id_idx` y `children_room_id_idx`; RLS está habilitado y las tres policies respetan rol y guardería.
-- [ ] La DB contiene exactamente las salas Soles, Lunas y Estrellas asociadas a Sala Soles, y cero filas en `children` antes del primer alta.
-- [ ] `/kids` con sesión staff muestra «SALA SOLES · 0 niños» y la grilla vacía; el select ofrece las tres salas desde la DB.
-- [ ] Un alta válida crea un registro, cierra el diálogo y lo muestra en `/kids`; el contador se incrementa y aparecen sus badges y «VINCULAR».
-- [ ] Las etiquetas «Maní» y «Lactosa» se almacenan como `peanut` y `lactose`; una etiqueta desconocida como «Polen» se guarda en minúsculas y se muestra como «POLEN».
-- [ ] El perfil `/kids/[id]` muestra nombre, edad derivada, fecha de nacimiento, sala, fecha de ingreso y alergias/notas reales; si no hay alergias ni notas muestra «Sin alergias ni notas registradas.»
-- [ ] El perfil no muestra padres enlazados; «Vincular otro padre» conserva el diálogo mock. «Editar» y «Resumen del día» siguen con `href="#"`.
-- [ ] Un ID inexistente devuelve 404; las rutas antiguas basadas en slug ya no resuelven perfiles.
-- [ ] La validación conserva los mensajes de SPEC 04, el formulario no se cierra si hay errores y el error se limpia al corregir el campo.
-- [ ] `features/kids/data.ts` ya no exporta `kids` ni `kidDetail` y conserva los exports que requiere `LinkParentDialog`.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y los flujos no generan errores de consola.
+- [x] `supabase/migrations/` contiene cuatro migraciones nuevas: `create_rooms`, `create_children`, `seed_rooms` y `add_rooms_children_policies`; las versiones coinciden con `list_migrations`.
+- [x] `rooms` y `children` tienen columnas, tipos, claves foráneas y defaults según el schema; existe `child_status` con `active` y `archived`.
+- [x] Existen los índices `rooms_daycare_id_idx` y `children_room_id_idx`; RLS está habilitado y las tres policies respetan rol y guardería.
+- [x] La DB contiene exactamente las salas Soles, Lunas y Estrellas asociadas a Sala Soles, y cero filas en `children` antes del primer alta.
+- [x] `/kids` con sesión staff muestra «SALA SOLES · 0 niños» y la grilla vacía; el select ofrece las tres salas desde la DB.
+- [x] Un alta válida crea un registro, cierra el diálogo y lo muestra en `/kids`; el contador se incrementa y aparecen sus badges y «VINCULAR».
+- [x] Las etiquetas «Maní» y «Lactosa» se almacenan como `peanut` y `lactose`; una etiqueta desconocida como «Polen» se guarda en minúsculas y se muestra como «POLEN».
+- [x] El perfil `/kids/[id]` muestra nombre, edad derivada, fecha de nacimiento, sala, fecha de ingreso y alergias/notas reales; si no hay alergias ni notas muestra «Sin alergias ni notas registradas.»
+- [x] El perfil no muestra padres enlazados; «Vincular otro padre» conserva el diálogo mock. «Editar» y «Resumen del día» siguen con `href="#"`.
+- [x] Un ID inexistente devuelve 404; las rutas antiguas basadas en slug ya no resuelven perfiles.
+- [x] La validación conserva los mensajes de SPEC 04, el formulario no se cierra si hay errores y el error se limpia al corregir el campo.
+- [x] `features/kids/data.ts` ya no exporta `kids` ni `kidDetail` y conserva los exports que requiere `LinkParentDialog`.
+- [x] `npm run lint` y `npm run build` terminan correctamente y los flujos no generan errores de consola.
 
 ## Decisions
 
