@@ -1,8 +1,14 @@
 "use server";
 
+import { randomInt } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/server/db/client";
+import { createServiceClient } from "@/server/db/service-client";
 import { requireUser } from "@/server/auth/session";
+import {
+  relationshipByRole,
+  type ParentRole,
+} from "@/features/kids/parent";
 import { parseAllergyTags, validateAddKid } from "@/features/kids/schema";
 import type {
   AddKidErrors,
@@ -14,6 +20,121 @@ export type AddKidActionResult = {
   formError?: string;
   success: boolean;
 };
+
+export type InviteParentValues = {
+  childId: string;
+  parentName: string;
+  email: string;
+  role: ParentRole;
+};
+
+export type InviteParentErrors = Partial<
+  Record<"parentName" | "email" | "role", string>
+>;
+
+export type InviteParentActionResult = {
+  errors: InviteParentErrors;
+  formError?: string;
+  code?: string;
+  success: boolean;
+};
+
+const invitationCodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const invitationCodeLength = 5;
+const invitationCodeAttempts = 5;
+const invitationLifetimeDays = 7;
+const inviteParentFormError =
+  "No se pudo enviar la invitación. Intentá de nuevo.";
+
+export async function inviteParentAction(
+  input: InviteParentValues,
+): Promise<InviteParentActionResult> {
+  const user = await requireUser();
+
+  if (user.role !== "staff" && user.role !== "admin") {
+    return {
+      errors: {},
+      formError: "No tenés permiso para enviar invitaciones.",
+      success: false,
+    };
+  }
+
+  if (!isInviteParentValues(input)) {
+    return { errors: {}, formError: inviteParentFormError, success: false };
+  }
+
+  const errors = validateInviteParent(input);
+
+  if (Object.values(errors).some(Boolean)) {
+    return { errors, success: false };
+  }
+
+  if (!isUuid(input.childId)) {
+    return { errors: {}, formError: inviteParentFormError, success: false };
+  }
+
+  const parentName = input.parentName.trim();
+  const email = input.email.trim().toLowerCase();
+
+  try {
+    const userClient = await createClient();
+    const { data: child, error: childError } = await userClient
+      .from("children")
+      .select("id")
+      .eq("id", input.childId)
+      .maybeSingle();
+
+    if (childError || !child) {
+      return { errors: {}, formError: inviteParentFormError, success: false };
+    }
+
+    const serviceClient = createServiceClient();
+    const { error: cancelError } = await serviceClient
+      .from("invitations")
+      .update({ status: "cancelled" })
+      .eq("child_id", child.id)
+      .eq("email", email)
+      .eq("status", "pending");
+
+    if (cancelError) {
+      return { errors: {}, formError: inviteParentFormError, success: false };
+    }
+
+    for (let attempt = 0; attempt < invitationCodeAttempts; attempt += 1) {
+      const code = generateInvitationCode();
+      const expiresAt = new Date(
+        Date.now() + invitationLifetimeDays * 24 * 60 * 60 * 1000,
+      ).toISOString();
+
+      const { error: insertError } = await serviceClient
+        .from("invitations")
+        .insert({
+          child_id: child.id,
+          invited_by: user.id,
+          full_name: parentName,
+          email,
+          relationship: relationshipByRole[input.role],
+          code,
+          expires_at: expiresAt,
+        });
+
+      if (!insertError) {
+        revalidatePath("/kids");
+        revalidatePath(`/kids/${child.id}`);
+
+        return { errors: {}, code, success: true };
+      }
+
+      if (insertError.code !== "23505") {
+        return { errors: {}, formError: inviteParentFormError, success: false };
+      }
+    }
+  } catch {
+    return { errors: {}, formError: inviteParentFormError, success: false };
+  }
+
+  return { errors: {}, formError: inviteParentFormError, success: false };
+}
 
 export async function addKidAction(
   input: AddKidValues,
@@ -103,6 +224,42 @@ function isAddKidValues(input: unknown): input is AddKidValues {
   return ["name", "birthDate", "classroom", "allergies", "notes"].every(
     (field) => typeof values[field] === "string",
   );
+}
+
+function isInviteParentValues(input: unknown): input is InviteParentValues {
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
+
+  const values = input as Record<string, unknown>;
+
+  return ["childId", "parentName", "email", "role"].every(
+    (field) => typeof values[field] === "string",
+  );
+}
+
+function validateInviteParent(values: InviteParentValues): InviteParentErrors {
+  const email = values.email.trim();
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validRole = Object.hasOwn(relationshipByRole, values.role);
+
+  return {
+    parentName: values.parentName.trim()
+      ? undefined
+      : "Ingresá el nombre del padre o madre",
+    email: !email
+      ? "Ingresá el email"
+      : validEmail
+        ? undefined
+        : "El email no es válido",
+    role: validRole ? undefined : "Elegí el parentesco",
+  };
+}
+
+function generateInvitationCode(): string {
+  return Array.from({ length: invitationCodeLength }, () =>
+    invitationCodeAlphabet.charAt(randomInt(invitationCodeAlphabet.length)),
+  ).join("");
 }
 
 function isUuid(value: string): boolean {

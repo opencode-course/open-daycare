@@ -1,6 +1,17 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type MouseEvent } from "react";
+import {
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type MouseEvent,
+  type SyntheticEvent,
+} from "react";
+import {
+  inviteParentAction,
+  type InviteParentActionResult,
+} from "@/features/kids/actions";
 import { parentRoleLabels, type ParentRole } from "@/features/kids/parent";
 
 const parentRoles: ParentRole[] = ["mother", "father", "tutor"];
@@ -13,8 +24,6 @@ type LinkParentFormValues = {
   email: string;
   role: ParentRole | null;
 };
-
-type LinkParentErrors = Partial<Record<keyof LinkParentFormValues, string>>;
 
 const initialFormValues: LinkParentFormValues = {
   parentName: "",
@@ -108,14 +117,53 @@ function SendIcon() {
   );
 }
 
+function InvitationCodeCard({
+  code,
+  copied = false,
+  onCopy,
+}: {
+  code: string;
+  copied?: boolean;
+  onCopy?: () => void;
+}) {
+  return (
+    <div className="mb-5 rounded-2xl border-[1.5px] border-dashed border-[#E6D08A] bg-[#FBF1D6] p-[18px] text-center">
+      <div className="mb-2 text-[12px] font-extrabold tracking-[0.7px] text-[#A88526]">
+        CÓDIGO DE INVITACIÓN
+      </div>
+      <div
+        aria-live="polite"
+        className="font-heading text-[34px] leading-tight font-semibold tracking-[7px] text-[#8A7234]"
+      >
+        {code}
+      </div>
+      <div className="mt-1.5 text-[13px] text-[#A88526]">Vence en 7 días</div>
+      {onCopy && (
+        <button
+          type="button"
+          onClick={onCopy}
+          className="mt-3 rounded-[10px] bg-[#F0E6D8] px-4 py-2 text-[13px] font-extrabold text-[#8A7234]"
+        >
+          {copied ? "¡Copiado!" : "Copiar"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 type LinkParentDialogProps = {
+  childId: string;
   kidName: string;
 };
 
-export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
+export function LinkParentDialog({ childId, kidName }: LinkParentDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [formValues, setFormValues] = useState(initialFormValues);
-  const [errors, setErrors] = useState<LinkParentErrors>({});
+  const [errors, setErrors] = useState<InviteParentActionResult["errors"]>({});
+  const [formError, setFormError] = useState<string>();
+  const [invitationCode, setInvitationCode] = useState<string>();
+  const [isCopied, setIsCopied] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const firstName = kidName.split(" ")[0];
 
   function openDialog() {
@@ -127,20 +175,29 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
   }
 
   function handleDialogClick(event: MouseEvent<HTMLDialogElement>) {
-    if (event.target === dialogRef.current) {
+    if (!isPending && event.target === dialogRef.current) {
       closeDialog();
+    }
+  }
+
+  function handleCancel(event: SyntheticEvent<HTMLDialogElement>) {
+    if (isPending) {
+      event.preventDefault();
     }
   }
 
   function handleClose() {
     setFormValues(initialFormValues);
     setErrors({});
+    setFormError(undefined);
+    setInvitationCode(undefined);
+    setIsCopied(false);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextErrors: LinkParentErrors = {
+    const nextErrors: InviteParentActionResult["errors"] = {
       parentName: getParentNameError(formValues.parentName) ?? undefined,
       email: getEmailError(formValues.email) ?? undefined,
       role: formValues.role ? undefined : "Elegí el parentesco",
@@ -148,13 +205,39 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
 
     setErrors(nextErrors);
 
-    if (Object.values(nextErrors).every((error) => !error)) {
-      closeDialog();
+    const role = formValues.role;
+
+    if (Object.values(nextErrors).some(Boolean) || !role) {
+      return;
     }
+
+    setFormError(undefined);
+
+    startTransition(async () => {
+      try {
+        const result = await inviteParentAction({
+          childId,
+          parentName: formValues.parentName,
+          email: formValues.email,
+          role,
+        });
+
+        setErrors(result.errors);
+        setFormError(result.formError);
+
+        if (result.success && result.code) {
+          setInvitationCode(result.code);
+          setIsCopied(false);
+        }
+      } catch {
+        setFormError("No se pudo enviar la invitación. Intentá de nuevo.");
+      }
+    });
   }
 
   function updateParentName(value: string) {
     setFormValues((currentValues) => ({ ...currentValues, parentName: value }));
+    setFormError(undefined);
 
     if (errors.parentName) {
       setErrors((currentErrors) => ({
@@ -166,6 +249,7 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
 
   function updateEmail(value: string) {
     setFormValues((currentValues) => ({ ...currentValues, email: value }));
+    setFormError(undefined);
 
     if (errors.email) {
       setErrors((currentErrors) => ({
@@ -177,9 +261,23 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
 
   function updateRole(role: ParentRole) {
     setFormValues((currentValues) => ({ ...currentValues, role }));
+    setFormError(undefined);
 
     if (errors.role) {
       setErrors((currentErrors) => ({ ...currentErrors, role: undefined }));
+    }
+  }
+
+  async function copyInvitationCode() {
+    if (!invitationCode) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(invitationCode);
+      setIsCopied(true);
+    } catch {
+      setIsCopied(false);
     }
   }
 
@@ -207,6 +305,7 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
         ref={dialogRef}
         aria-labelledby="link-parent-title"
         onClick={handleDialogClick}
+        onCancel={handleCancel}
         onClose={handleClose}
         className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[480px] overflow-hidden rounded-[24px] border border-border bg-[#FBF4EC] p-0 text-foreground shadow-[0_20px_50px_-24px_rgba(63,54,46,0.35)] backdrop:bg-[rgba(63,54,46,0.45)]"
       >
@@ -223,129 +322,160 @@ export function LinkParentDialog({ kidName }: LinkParentDialogProps) {
           <button
             type="button"
             onClick={closeDialog}
+            disabled={isPending}
             aria-label="Cerrar diálogo"
-            className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B]"
+            className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CloseIcon />
           </button>
         </header>
 
-        <form
-          noValidate
-          onSubmit={handleSubmit}
-          className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-[22px]"
-        >
-          <div className="mb-5 flex gap-[11px] rounded-[14px] bg-[#E3ECFB] px-4 py-[13px]">
-            <InfoIcon />
-            <span className="text-[13.5px] leading-[1.45] text-[#3F5694]">
-              Le enviaremos un correo con un código para que active su cuenta.
-              Solo verá el feed de {firstName}.
-            </span>
-          </div>
-
-          <div className="mb-[18px]">
-            <label
-              htmlFor="link-parent-name"
-              className="mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted"
-            >
-              NOMBRE DEL PADRE/MADRE
-            </label>
-            <input
-              id="link-parent-name"
-              name="parentName"
-              value={formValues.parentName}
-              onChange={(event) => updateParentName(event.target.value)}
-              required
-              aria-invalid={Boolean(errors.parentName)}
-              aria-describedby={errors.parentName ? "link-parent-name-error" : undefined}
-              placeholder="Ej. Diego Fernández"
-              className={getInputClassName(Boolean(errors.parentName))}
+        {invitationCode ? (
+          <div className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-[22px]">
+            <InvitationCodeCard
+              code={invitationCode}
+              copied={isCopied}
+              onCopy={copyInvitationCode}
             />
-            {errors.parentName && (
-              <p id="link-parent-name-error" role="alert" className={errorMessageClassName}>
-                {errors.parentName}
-              </p>
-            )}
           </div>
-
-          <div className="mb-[18px]">
-            <label
-              htmlFor="link-parent-email"
-              className="mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted"
-            >
-              EMAIL
-            </label>
-            <input
-              id="link-parent-email"
-              name="email"
-              type="email"
-              value={formValues.email}
-              onChange={(event) => updateEmail(event.target.value)}
-              required
-              aria-invalid={Boolean(errors.email)}
-              aria-describedby={errors.email ? "link-parent-email-error" : undefined}
-              placeholder="correo@ejemplo.com"
-              className={getInputClassName(Boolean(errors.email))}
-            />
-            {errors.email && (
-              <p id="link-parent-email-error" role="alert" className={errorMessageClassName}>
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <fieldset
-            aria-invalid={Boolean(errors.role)}
-            aria-describedby={errors.role ? "link-parent-role-error" : undefined}
-            className="mb-5 border-0 p-0"
+        ) : (
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            className="max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain px-[26px] py-[22px]"
           >
-            <legend className="mb-[10px] block text-[12px] font-extrabold tracking-[0.7px] text-muted">
-              PARENTESCO
-            </legend>
-            <div className="flex gap-[9px]">
-              {parentRoles.map((role) => (
-                <button
-                  key={role}
-                  type="button"
-                  aria-pressed={formValues.role === role}
-                  onClick={() => updateRole(role)}
-                  className={`flex-1 rounded-full border-[1.5px] p-[11px] text-[14px] font-extrabold ${
-                    formValues.role === role
-                      ? "border-[#9FB8EC] bg-[#CCD8F4] text-[#4E72C8]"
-                      : "border-border bg-[#FFFDF9] text-[#6E6359]"
-                  }`}
+            <div className="mb-5 flex gap-[11px] rounded-[14px] bg-[#E3ECFB] px-4 py-[13px]">
+              <InfoIcon />
+              <span className="text-[13.5px] leading-[1.45] text-[#3F5694]">
+                Le enviaremos un correo con un código para que active su cuenta.
+                Solo verá el feed de {firstName}.
+              </span>
+            </div>
+
+            <div className="mb-[18px]">
+              <label
+                htmlFor="link-parent-name"
+                className="mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted"
+              >
+                NOMBRE DEL PADRE/MADRE
+              </label>
+              <input
+                id="link-parent-name"
+                name="parentName"
+                value={formValues.parentName}
+                onChange={(event) => updateParentName(event.target.value)}
+                disabled={isPending}
+                required
+                aria-invalid={Boolean(errors.parentName)}
+                aria-describedby={
+                  errors.parentName ? "link-parent-name-error" : undefined
+                }
+                placeholder="Ej. Diego Fernández"
+                className={getInputClassName(Boolean(errors.parentName))}
+              />
+              {errors.parentName && (
+                <p
+                  id="link-parent-name-error"
+                  role="alert"
+                  className={errorMessageClassName}
                 >
-                  {parentRoleLabels[role]}
-                </button>
-              ))}
+                  {errors.parentName}
+                </p>
+              )}
             </div>
-            {errors.role && (
-              <p id="link-parent-role-error" role="alert" className={errorMessageClassName}>
-                {errors.role}
+
+            <div className="mb-[18px]">
+              <label
+                htmlFor="link-parent-email"
+                className="mb-2 block text-[12px] font-extrabold tracking-[0.7px] text-muted"
+              >
+                EMAIL
+              </label>
+              <input
+                id="link-parent-email"
+                name="email"
+                type="email"
+                value={formValues.email}
+                onChange={(event) => updateEmail(event.target.value)}
+                disabled={isPending}
+                required
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={
+                  errors.email ? "link-parent-email-error" : undefined
+                }
+                placeholder="correo@ejemplo.com"
+                className={getInputClassName(Boolean(errors.email))}
+              />
+              {errors.email && (
+                <p
+                  id="link-parent-email-error"
+                  role="alert"
+                  className={errorMessageClassName}
+                >
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            <fieldset
+              aria-invalid={Boolean(errors.role)}
+              aria-describedby={
+                errors.role ? "link-parent-role-error" : undefined
+              }
+              className="mb-5 border-0 p-0"
+            >
+              <legend className="mb-[10px] block text-[12px] font-extrabold tracking-[0.7px] text-muted">
+                PARENTESCO
+              </legend>
+              <div className="flex gap-[9px]">
+                {parentRoles.map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    aria-pressed={formValues.role === role}
+                    onClick={() => updateRole(role)}
+                    disabled={isPending}
+                    className={`flex-1 rounded-full border-[1.5px] p-[11px] text-[14px] font-extrabold ${
+                      formValues.role === role
+                        ? "border-[#9FB8EC] bg-[#CCD8F4] text-[#4E72C8]"
+                        : "border-border bg-[#FFFDF9] text-[#6E6359]"
+                    }`}
+                  >
+                    {parentRoleLabels[role]}
+                  </button>
+                ))}
+              </div>
+              {errors.role && (
+                <p
+                  id="link-parent-role-error"
+                  role="alert"
+                  className={errorMessageClassName}
+                >
+                  {errors.role}
+                </p>
+              )}
+            </fieldset>
+
+            <InvitationCodeCard code="7K4P9" />
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] p-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,0.7)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <SendIcon />
+              Enviar invitación
+            </button>
+            {formError && (
+              <p
+                role="alert"
+                className={`${errorMessageClassName} mt-3 text-center`}
+              >
+                {formError}
               </p>
             )}
-          </fieldset>
-
-          <div className="mb-5 rounded-2xl border-[1.5px] border-dashed border-[#E6D08A] bg-[#FBF1D6] p-[18px] text-center">
-            <div className="mb-2 text-[12px] font-extrabold tracking-[0.7px] text-[#A88526]">
-              CÓDIGO DE INVITACIÓN
-            </div>
-            <div className="font-heading text-[34px] leading-tight font-semibold tracking-[7px] text-[#8A7234]">
-              7K4P9
-            </div>
-            <div className="mt-1.5 text-[13px] text-[#A88526]">
-              Vence en 7 días
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] p-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,0.7)]"
-          >
-            <SendIcon />
-            Enviar invitación
-          </button>
-        </form>
+          </form>
+        )}
       </dialog>
     </>
   );

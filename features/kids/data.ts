@@ -5,6 +5,13 @@ import {
   allergyTagLabels,
 } from "@/features/kids/schema";
 import type { AvatarTone } from "@/shared/types/avatar";
+import { getAvatarInitial, getAvatarTone } from "@/shared/lib/avatar";
+import {
+  roleByRelationship,
+  type ParentLink,
+  type ParentStatus,
+  type RelationshipType,
+} from "@/features/kids/parent";
 
 export {
   parentRoleLabels,
@@ -51,14 +58,15 @@ type KidRow = {
   room: { name: string } | { name: string }[] | null;
 };
 
-const avatarTones: readonly AvatarTone[] = [
-  "sky",
-  "rose",
-  "mint",
-  "sun",
-  "lilac",
-  "skySoft",
-];
+type ParentChildRow = {
+  relationship: RelationshipType;
+  parent: { full_name: string } | { full_name: string }[] | null;
+};
+
+type InvitationRow = {
+  full_name: string;
+  relationship: RelationshipType;
+};
 
 const spanishMonths = [
   "ene",
@@ -126,6 +134,53 @@ export async function getKidById(id: string): Promise<Kid | null> {
   return data ? mapKidRow(data as KidRow) : null;
 }
 
+export async function getParentsForKid(childId: string): Promise<ParentLink[]> {
+  if (!isUuid(childId)) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const [activeResult, pendingResult] = await Promise.all([
+    supabase
+      .from("parent_children")
+      .select(
+        "relationship, parent:users!parent_children_parent_id_fkey(full_name)",
+      )
+      .eq("child_id", childId),
+    supabase
+      .from("invitations")
+      .select("full_name, relationship")
+      .eq("child_id", childId)
+      .eq("status", "pending")
+      .gt("expires_at", new Date().toISOString()),
+  ]);
+
+  if (activeResult.error) {
+    throw activeResult.error;
+  }
+
+  if (pendingResult.error) {
+    throw pendingResult.error;
+  }
+
+  const activeParents = ((activeResult.data ?? []) as ParentChildRow[])
+    .map((row) => {
+      const parent = Array.isArray(row.parent) ? row.parent[0] : row.parent;
+
+      return parent
+        ? mapParentLink(parent.full_name, row.relationship, "active")
+        : null;
+    })
+    .filter((parent): parent is ParentLink => parent !== null)
+    .sort(compareParentNames);
+
+  const pendingParents = ((pendingResult.data ?? []) as InvitationRow[])
+    .map((row) => mapParentLink(row.full_name, row.relationship, "pending"))
+    .sort(compareParentNames);
+
+  return [...activeParents, ...pendingParents];
+}
+
 function mapKidRow(row: KidRow): Kid {
   const room = Array.isArray(row.room) ? row.room[0] : row.room;
   const fullName = row.full_name.trim();
@@ -133,7 +188,7 @@ function mapKidRow(row: KidRow): Kid {
   return {
     id: row.id,
     fullName,
-    avatarInitial: fullName.charAt(0).toLocaleUpperCase("es"),
+    avatarInitial: getAvatarInitial(fullName),
     avatarTone: getAvatarTone(fullName),
     age: calculateAge(row.birth_date),
     allergyTags: (row.allergy_tags ?? []).map(
@@ -146,6 +201,26 @@ function mapKidRow(row: KidRow): Kid {
   };
 }
 
+function mapParentLink(
+  name: string,
+  relationship: RelationshipType,
+  status: ParentStatus,
+): ParentLink {
+  const fullName = name.trim();
+
+  return {
+    name: fullName,
+    avatarInitial: getAvatarInitial(fullName),
+    avatarTone: getAvatarTone(fullName),
+    role: roleByRelationship[relationship],
+    status,
+  };
+}
+
+function compareParentNames(first: ParentLink, second: ParentLink): number {
+  return first.name.localeCompare(second.name, "es");
+}
+
 function calculateAge(birthDate: string): number {
   const [year, month, day] = birthDate.split("-").map(Number);
   const today = new Date();
@@ -154,16 +229,6 @@ function calculateAge(birthDate: string): number {
     (today.getMonth() + 1 === month && today.getDate() >= day);
 
   return today.getFullYear() - year - (hasBirthdayPassed ? 0 : 1);
-}
-
-function getAvatarTone(fullName: string): AvatarTone {
-  let hash = 0;
-
-  for (let index = 0; index < fullName.length; index += 1) {
-    hash = (hash * 31 + fullName.charCodeAt(index)) >>> 0;
-  }
-
-  return avatarTones[hash % avatarTones.length];
 }
 
 function formatBirthDate(date: string): string {

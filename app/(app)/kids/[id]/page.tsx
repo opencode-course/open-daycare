@@ -4,7 +4,13 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { avatarToneClasses } from "@/components/avatarTone";
 import { LinkParentDialog } from "@/features/kids/components/LinkParentDialog";
-import { getKidById } from "@/features/kids/data";
+import {
+  getKidById,
+  getParentsForKid,
+  parentRoleLabels,
+  parentStatusLabels,
+  parentStatusText,
+} from "@/features/kids/data";
 
 type KidPageProps = PageProps<"/kids/[id]">;
 
@@ -86,6 +92,7 @@ export default async function KidProfilePage({ params }: KidPageProps) {
     notFound();
   }
 
+  const parents = await getParentsForKid(kid.id);
   const medicalNotes = kid.medicalNotes?.trim() ?? "";
   const healthSummary = [
     kid.allergyTags.length > 0
@@ -179,7 +186,42 @@ export default async function KidProfilePage({ params }: KidPageProps) {
             <h2 className="mb-[14px] text-[12.5px] font-extrabold tracking-[0.8px] text-[#8A7C6D]">
               PADRES VINCULADOS
             </h2>
-            <LinkParentDialog kidName={kid.fullName} />
+            {parents.length > 0 && (
+              <div className="mb-[14px] flex flex-col gap-3">
+                {parents.map((parent, index) => (
+                  <div
+                    key={`${parent.status}-${parent.name}-${index}`}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-full font-heading text-base font-semibold ${avatarToneClasses[parent.avatarTone]}`}
+                      >
+                        {parent.avatarInitial}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-[14px] font-extrabold text-foreground">
+                          {parent.name}
+                        </p>
+                        <p className="text-[12px] text-muted">
+                          {parentRoleLabels[parent.role]} · {parentStatusText[parent.status]}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-[0.4px] ${
+                        parent.status === "active"
+                          ? "bg-[#CFEBD8] text-[#3E9B6C]"
+                          : "bg-[#F7E7A6] text-[#9A7B1E]"
+                      }`}
+                    >
+                      {parentStatusLabels[parent.status]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <LinkParentDialog childId={kid.id} kidName={kid.fullName} />
           </section>
         </aside>
       </div>
