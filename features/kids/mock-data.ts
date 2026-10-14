@@ -1,5 +1,4 @@
 import type { AvatarTone } from "@/shared/types/avatar";
-import type { ParentLink } from "@/features/kids/parent";
 
 export type MockKid = {
   slug: string;
@@ -85,26 +84,3 @@ export const kids: MockKid[] = [
     parentsCount: 1,
   },
 ];
-
-export const kidDetail = {
-  birthDate: "12 mar 2022",
-  classroom: "Soles",
-  enrollment: "feb 2025",
-  notes: "Alergia al maní. Evitar frutos secos. Lleva inhalador en la mochila.",
-  parents: [
-    {
-      name: "Lucía Fernández",
-      avatarInitial: "L",
-      avatarTone: "lilac",
-      role: "mother",
-      status: "active",
-    },
-    {
-      name: "Diego Fernández",
-      avatarInitial: "D",
-      avatarTone: "skySoft",
-      role: "father",
-      status: "pending",
-    },
-  ] satisfies ParentLink[],
-};

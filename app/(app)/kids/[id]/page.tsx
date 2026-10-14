@@ -1,56 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { avatarToneClasses } from "@/components/avatarTone";
 import { LinkParentDialog } from "@/features/kids/components/LinkParentDialog";
-import {
-  kidDetail,
-  kids,
-} from "@/features/kids/mock-data";
-import {
-  parentRoleLabels,
-  parentStatusLabels,
-  parentStatusText,
-} from "@/features/kids/parent";
-import type { AvatarTone } from "@/shared/types/avatar";
+import { getKidById } from "@/features/kids/data";
 
-type KidPageProps = {
-  params: Promise<{ slug: string }>;
-};
+type KidPageProps = PageProps<"/kids/[id]">;
 
 export const instant = false;
 
-const avatarToneClasses: Record<AvatarTone, string> = {
-  sky: "bg-[#A9D9E8] text-[#1F7A93]",
-  rose: "bg-[#F4B8CC] text-[#C44A7A]",
-  mint: "bg-[#B9DEC4] text-[#3E8B62]",
-  sun: "bg-[#F4DC8E] text-[#9A7B1E]",
-  lilac: "bg-[#C9B6E8] text-[#7B5FC0]",
-  skySoft: "bg-[#A9C7E8] text-white",
-};
-
-const parentAvatarToneClasses: Record<AvatarTone, string> = {
-  sky: "bg-[#A9D9E8]",
-  rose: "bg-[#F4B8CC]",
-  mint: "bg-[#B9DEC4]",
-  sun: "bg-[#F4DC8E]",
-  lilac: "bg-[#C9B6E8]",
-  skySoft: "bg-[#A9C7E8]",
-};
-
-export function generateStaticParams() {
-  return kids.map(({ slug }) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: KidPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const kid = kids.find((item) => item.slug === slug);
+  await connection();
+  const { id } = await params;
+  const kid = await getKidById(id);
 
   if (!kid) {
     notFound();
   }
 
   return {
-    title: `${kid.name} · OpenDayCare`,
+    title: `${kid.fullName} · OpenDayCare`,
   };
 }
 
@@ -108,12 +78,23 @@ function SparkleIcon() {
 }
 
 export default async function KidProfilePage({ params }: KidPageProps) {
-  const { slug } = await params;
-  const kid = kids.find((item) => item.slug === slug);
+  await connection();
+  const { id } = await params;
+  const kid = await getKidById(id);
 
   if (!kid) {
     notFound();
   }
+
+  const medicalNotes = kid.medicalNotes?.trim() ?? "";
+  const healthSummary = [
+    kid.allergyTags.length > 0
+      ? `Alergias: ${kid.allergyTags.join(", ")}`
+      : "",
+    medicalNotes,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="mx-auto w-full max-w-[820px] px-5 pb-20 pt-[34px] sm:px-10">
@@ -135,10 +116,10 @@ export default async function KidProfilePage({ params }: KidPageProps) {
             </span>
             <div className="min-w-0 flex-1">
               <h1 className="m-0 font-heading text-2xl leading-tight font-semibold text-foreground sm:text-[28px]">
-                {kid.name}
+                {kid.fullName}
               </h1>
               <p className="mt-[3px] text-[15px] text-muted">
-                {kid.age} años · Sala {kidDetail.classroom}
+                {kid.age} años · Sala {kid.roomName}
               </p>
             </div>
             <a
@@ -158,7 +139,7 @@ export default async function KidProfilePage({ params }: KidPageProps) {
                 Alergias y notas
               </h2>
               <p className="m-0 text-[14.5px] leading-[1.5] text-[#B25249]">
-                {kidDetail.notes}
+                {healthSummary || "Sin alergias ni notas registradas."}
               </p>
             </div>
           </section>
@@ -167,19 +148,19 @@ export default async function KidProfilePage({ params }: KidPageProps) {
             <div className="flex justify-between gap-4 border-b border-[#F0E6D8] px-[18px] py-[15px]">
               <dt className="text-[14.5px] text-muted">Fecha de nacimiento</dt>
               <dd className="m-0 text-right text-[14.5px] font-extrabold text-foreground">
-                {kidDetail.birthDate}
+                {kid.birthDate}
               </dd>
             </div>
             <div className="flex justify-between gap-4 border-b border-[#F0E6D8] px-[18px] py-[15px]">
               <dt className="text-[14.5px] text-muted">Sala</dt>
               <dd className="m-0 text-right text-[14.5px] font-extrabold text-foreground">
-                {kidDetail.classroom}
+                {kid.roomName}
               </dd>
             </div>
             <div className="flex justify-between gap-4 px-[18px] py-[15px]">
               <dt className="text-[14.5px] text-muted">Ingreso</dt>
               <dd className="m-0 text-right text-[14.5px] font-extrabold text-foreground">
-                {kidDetail.enrollment}
+                {kid.enrolledAt}
               </dd>
             </div>
           </dl>
@@ -198,36 +179,7 @@ export default async function KidProfilePage({ params }: KidPageProps) {
             <h2 className="mb-[14px] text-[12.5px] font-extrabold tracking-[0.8px] text-[#8A7C6D]">
               PADRES VINCULADOS
             </h2>
-            <div className="flex flex-col gap-[14px]">
-              {kidDetail.parents.map((parent) => (
-                <div key={parent.name} className="flex items-center gap-3">
-                  <span
-                    className={`flex size-10 shrink-0 items-center justify-center rounded-full font-heading text-base font-semibold text-white ${parentAvatarToneClasses[parent.avatarTone]}`}
-                  >
-                    {parent.avatarInitial}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="m-0 truncate text-[14.5px] font-extrabold text-foreground">
-                      {parent.name}
-                    </p>
-                    <p className="m-0 text-[12.5px] text-muted">
-                      {parentRoleLabels[parent.role]} · {parentStatusText[parent.status]}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-full px-[9px] py-1 text-[10.5px] font-extrabold ${
-                      parent.status === "active"
-                        ? "bg-[#CFEBD8] text-[#3E9B6C]"
-                        : "bg-[#F7E7A6] text-[#9A7B1E]"
-                    }`}
-                  >
-                    {parentStatusLabels[parent.status]}
-                  </span>
-                </div>
-              ))}
-
-              <LinkParentDialog kidName={kid.name} />
-            </div>
+            <LinkParentDialog kidName={kid.fullName} />
           </section>
         </aside>
       </div>

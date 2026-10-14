@@ -5,7 +5,7 @@ import type { Kid } from "@/features/kids/data";
 export function KidCard({ kid }: { kid: Kid }) {
   return (
     <Link
-      href="#"
+      href={`/kids/${kid.id}`}
       className="flex min-w-0 items-center gap-3.5 rounded-[18px] border border-border bg-surface p-4 shadow-[0_4px_14px_-12px_rgba(120,90,60,0.5)] transition duration-150 hover:-translate-y-0.5 hover:border-[#F2A78E]"
     >
       <span
