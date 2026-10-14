@@ -187,22 +187,22 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `supabase/migrations/` agrega las tres migraciones con versiones exactas de MCP; `list_migrations` las muestra.
-- [ ] `parent_children` e `invitations` tienen columnas, FKs, `unique (parent_id, child_id)`, `code` UNIQUE e índices según el schema; RLS habilitado.
-- [ ] Las 4 policies y `current_user_daycare_id()` existen y limitan acceso por guardería/rol; `get_advisors` no reporta hallazgos WARN/ERROR.
-- [ ] «Enviar invitación» con los tres campos válidos crea una fila `pending` (invited_by, email en minúsculas, parentesco, expires_at +7 días) y el diálogo muestra el código con «Vence en 7 días» y «Copiar» que copia al portapapeles.
-- [ ] El código tiene 5 mayúsculas sin `0/O/1/I` y es único en `invitations`.
+- [x] `supabase/migrations/` agrega las tres migraciones con versiones exactas de MCP; `list_migrations` las muestra.
+- [x] `parent_children` e `invitations` tienen columnas, FKs, `unique (parent_id, child_id)`, `code` UNIQUE e índices según el schema; RLS habilitado.
+- [x] Las 4 policies y `current_user_daycare_id()` existen y limitan acceso por guardería/rol; `get_advisors` no reporta hallazgos WARN/ERROR.
+- [x] «Enviar invitación» con los tres campos válidos crea una fila `pending` (invited_by, email en minúsculas, parentesco, expires_at +7 días) y el diálogo muestra el código con «Vence en 7 días» y «Copiar» que copia al portapapeles.
+- [x] El código tiene 5 mayúsculas sin `0/O/1/I` y es único en `invitations`.
 - [ ] Reenviar para el mismo email y niño deja la pendiente anterior `cancelled` y crea una nueva `pending`.
-- [ ] Los errores de validación del diálogo muestran los mensajes de SPEC 05 y no crean invitación.
-- [ ] PADRES VINCULADOS muestra la pendiente («{Parentesco} · invitación enviada», badge PENDIENTE), al padre activo con badge ACTIVA tras activar, y solo «Vincular otro padre» cuando no hay ninguno.
-- [ ] `/auth/activate-account` es accesible sin sesión; con sesión redirige a `/`.
-- [ ] Un código válido muestra «{Niño} · {Sala}» reales en la sección; inválido/vencido la mantiene oculta hasta el submit.
-- [ ] Activación válida crea el auth user confirmado, `public.users` (role `parent`, guardería del niño), `parent_children` con el parentesco de la invitación, actualiza `children.photo_consent` según el checkbox, marca la invitación `accepted` con `accepted_at`, inicia sesión y redirige a `/`.
-- [ ] Tras activar, el sidebar muestra el nombre del padre y «Familia · {guardería}», y el perfil del niño lo lista como ACTIVA.
-- [ ] Código inexistente → «El código no es válido»; usado → «Este código ya fue usado.»; vencido → «La invitación venció. Pedí una nueva.» (fila pasa a `expired`); email distinto → «El email no coincide con la invitación.»; cuenta existente → «Ya existe una cuenta con este email. Iniciá sesión.».
-- [ ] Campos vacíos/inválidos muestran los mensajes definidos y se limpian al editar el campo.
-- [ ] Al reabrir el diálogo tras un envío, vuelve al formulario limpio.
-- [ ] `npm run lint` y `npm run build` terminan correctamente y los flujos no generan errores de consola.
+- [x] Los errores de validación del diálogo muestran los mensajes de SPEC 05 y no crean invitación.
+- [x] PADRES VINCULADOS muestra la pendiente («{Parentesco} · invitación enviada», badge PENDIENTE), al padre activo con badge ACTIVA tras activar, y solo «Vincular otro padre» cuando no hay ninguno.
+- [x] `/auth/activate-account` es accesible sin sesión; con sesión redirige a `/`.
+- [x] Un código válido muestra «{Niño} · {Sala}» reales en la sección; inválido/vencido la mantiene oculta hasta el submit.
+- [x] Activación válida crea el auth user confirmado, `public.users` (role `parent`, guardería del niño), `parent_children` con el parentesco de la invitación, actualiza `children.photo_consent` según el checkbox, marca la invitación `accepted` con `accepted_at`, inicia sesión y redirige a `/`.
+- [x] Tras activar, el sidebar muestra el nombre del padre y «Familia · {guardería}», y el perfil del niño lo lista como ACTIVA.
+- [x] Código inexistente → «El código no es válido»; usado → «Este código ya fue usado.»; vencido → «La invitación venció. Pedí una nueva.» (fila pasa a `expired`); email distinto → «El email no coincide con la invitación.»; cuenta existente → «Ya existe una cuenta con este email. Iniciá sesión.».
+- [x] Campos vacíos/inválidos muestran los mensajes definidos y se limpian al editar el campo.
+- [x] Al reabrir el diálogo tras un envío, vuelve al formulario limpio.
+- [x] `npm run lint` y `npm run build` terminan correctamente y los flujos no generan errores de consola.
 
 ## Decisions
 
