@@ -3,6 +3,8 @@ import { avatarToneClasses } from "@/components/avatarTone";
 import type { Kid } from "@/features/kids/data";
 
 export function KidCard({ kid }: { kid: Kid }) {
+  const [firstAllergy, ...remainingAllergies] = kid.allergyTags;
+
   return (
     <Link
       href={`/kids/${kid.id}`}
@@ -24,14 +26,33 @@ export function KidCard({ kid }: { kid: Kid }) {
       </span>
 
       <span className="flex shrink-0 flex-wrap justify-end gap-1.5">
-        {kid.allergyTags.map((allergyTag) => (
+        {firstAllergy && (
           <span
-            key={allergyTag}
             className="rounded-full bg-[#FBD8CC] px-[9px] py-[5px] text-[11px] leading-none font-extrabold text-[#D9684A]"
           >
-            {allergyTag.toLocaleUpperCase("es")}
+            {firstAllergy.toLocaleUpperCase("es")}
           </span>
-        ))}
+        )}
+        {remainingAllergies.length > 0 && (
+          <span className="group/allergies relative">
+            <span
+              aria-label={`Alergias adicionales: ${remainingAllergies.join(", ")}`}
+              className="inline-block rounded-full bg-[#FBD8CC] px-[9px] py-[5px] text-[11px] leading-none font-extrabold text-[#D9684A]"
+            >
+              +{remainingAllergies.length}
+            </span>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute right-0 bottom-full z-10 mb-2 hidden w-max max-w-52 rounded-lg bg-foreground px-3 py-2 text-left text-xs font-semibold text-surface shadow-lg group-hover/allergies:block"
+            >
+              <span className="flex flex-col gap-1">
+                {kid.allergyTags.map((allergy, index) => (
+                  <span key={`${allergy}-${index}`}>{allergy}</span>
+                ))}
+              </span>
+            </span>
+          </span>
+        )}
         <span className="rounded-full bg-[#F9D2DE] px-[9px] py-[5px] text-[11px] leading-none font-extrabold text-[#C56486]">
           VINCULAR
         </span>
