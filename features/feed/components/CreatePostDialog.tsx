@@ -5,8 +5,10 @@ import {
   useState,
   type FormEvent,
   type MouseEvent,
+  type ChangeEvent,
 } from "react";
-import { kids } from "@/features/kids/mock-data";
+import { createPost } from "@/features/feed/actions";
+import type { Kid } from "@/features/kids/data";
 import {
   postTypeChipLabels,
   type PostType,
@@ -33,16 +35,25 @@ const postTypeSelectedStyles: Record<PostType, string> = {
   announcement: "border-transparent bg-[#CCD8F4] text-[#4E72C8]",
 };
 
+const MAX_PHOTOS = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_MIME_TYPES = "image/jpeg,image/png,image/webp,image/heic";
+
 type CreatePostFormValues = {
-  selectedKidSlugs: string[];
+  selectedKidIds: string[];
   wholeRoom: boolean;
   type: PostType | null;
   description: string;
 };
 
+type PhotoWithPreview = {
+  file: File;
+  previewUrl: string;
+};
+
 function createInitialFormValues(): CreatePostFormValues {
   return {
-    selectedKidSlugs: [],
+    selectedKidIds: [],
     wholeRoom: false,
     type: null,
     description: "",
@@ -52,28 +63,33 @@ function createInitialFormValues(): CreatePostFormValues {
 type CreatePostDialogProps = {
   name: string;
   initials: string;
+  kids: Kid[];
 };
 
-export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
+export function CreatePostDialog({ name, initials, kids }: CreatePostDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formValues, setFormValues] = useState(createInitialFormValues);
+  const [photos, setPhotos] = useState<PhotoWithPreview[]>([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const audienceIsInvalid =
-    !formValues.wholeRoom && formValues.selectedKidSlugs.length === 0;
+    !formValues.wholeRoom && formValues.selectedKidIds.length === 0;
   const typeIsInvalid = formValues.type === null;
   const descriptionIsInvalid = formValues.description.trim().length === 0;
 
-  function toggleKid(kidSlug: string) {
+  function toggleKid(kidId: string) {
     setFormValues((current) => {
-      const isSelected = current.selectedKidSlugs.includes(kidSlug);
+      const isSelected = current.selectedKidIds.includes(kidId);
 
       return {
         ...current,
         wholeRoom: false,
-        selectedKidSlugs: isSelected
-          ? current.selectedKidSlugs.filter((slug) => slug !== kidSlug)
-          : [...current.selectedKidSlugs, kidSlug],
+        selectedKidIds: isSelected
+          ? current.selectedKidIds.filter((id) => id !== kidId)
+          : [...current.selectedKidIds, kidId],
       };
     });
   }
@@ -85,7 +101,7 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
       return {
         ...current,
         wholeRoom,
-        selectedKidSlugs: wholeRoom ? [] : current.selectedKidSlugs,
+        selectedKidIds: wholeRoom ? [] : current.selectedKidIds,
       };
     });
   }
@@ -98,11 +114,83 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
     setFormValues((current) => ({ ...current, description }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    const remainingSlots = MAX_PHOTOS - photos.length;
+    if (remainingSlots <= 0) {
+      setFormError(`Máximo ${MAX_PHOTOS} fotos por publicación.`);
+      return;
+    }
+
+    const filesToAdd = files.slice(0, remainingSlots);
+    const validPhotos: PhotoWithPreview[] = [];
+
+    for (const file of filesToAdd) {
+      if (file.size > MAX_FILE_SIZE) {
+        setFormError("Cada foto debe pesar menos de 5 MB.");
+        continue;
+      }
+
+      if (!ACCEPTED_MIME_TYPES.split(",").includes(file.type)) {
+        setFormError("Solo se permiten fotos JPEG, PNG, WEBP o HEIC.");
+        continue;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      validPhotos.push({ file, previewUrl });
+    }
+
+    if (validPhotos.length > 0) {
+      setPhotos((current) => [...current, ...validPhotos]);
+      setFormError(null);
+    }
+  }
+
+  function removePhoto(index: number) {
+    setPhotos((current) => {
+      const photoToRemove = current[index];
+      if (photoToRemove) {
+        URL.revokeObjectURL(photoToRemove.previewUrl);
+      }
+
+      return current.filter((_, i) => i !== index);
+    });
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setHasSubmitted(true);
+    setFormError(null);
 
     if (audienceIsInvalid || typeIsInvalid || descriptionIsInvalid) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    formData.append("type", formValues.type!);
+    formData.append("description", formValues.description.trim());
+    formData.append("wholeRoom", formValues.wholeRoom.toString());
+
+    if (!formValues.wholeRoom) {
+      for (const kidId of formValues.selectedKidIds) {
+        formData.append("children", kidId);
+      }
+    }
+
+    for (const photo of photos) {
+      formData.append("photos", photo.file);
+    }
+
+    const result = await createPost(formData);
+
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setFormError(result.error);
       return;
     }
 
@@ -125,7 +213,15 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
 
   function resetForm() {
     setFormValues(createInitialFormValues());
+    setPhotos((current) => {
+      for (const photo of current) {
+        URL.revokeObjectURL(photo.previewUrl);
+      }
+      return [];
+    });
     setHasSubmitted(false);
+    setFormError(null);
+    setIsSubmitting(false);
   }
 
   return (
@@ -184,9 +280,10 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
             </h2>
             <button
               type="submit"
-              className="justify-self-end text-sm font-extrabold text-[#D9583C] sm:text-[15px]"
+              disabled={isSubmitting}
+              className="justify-self-end text-sm font-extrabold text-[#D9583C] sm:text-[15px] disabled:opacity-50"
             >
-              Publicar
+              {isSubmitting ? "Publicando…" : "Publicar"}
             </button>
           </header>
 
@@ -207,16 +304,14 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
                 }
               >
                 {kids.map((kid) => {
-                  const isSelected = formValues.selectedKidSlugs.includes(
-                    kid.slug,
-                  );
+                  const isSelected = formValues.selectedKidIds.includes(kid.id);
 
                   return (
                     <button
-                      key={kid.slug}
+                      key={kid.id}
                       type="button"
                       aria-pressed={isSelected}
-                      onClick={() => toggleKid(kid.slug)}
+                      onClick={() => toggleKid(kid.id)}
                       className={`flex items-center gap-2 rounded-full border-[1.5px] py-[6px] pr-[14px] pl-[6px] text-sm font-bold ${
                         isSelected
                           ? "border-[#3F362E] bg-[#3F362E] text-white"
@@ -229,7 +324,7 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
                       >
                         {kid.avatarInitial}
                       </span>
-                      {kid.name.split(" ")[0]}
+                      {kid.fullName.split(" ")[0]}
                     </button>
                   );
                 })}
@@ -344,43 +439,80 @@ export function CreatePostDialog({ name, initials }: CreatePostDialogProps) {
               >
                 FOTOS
               </h3>
-              <div className="flex gap-3">
-                <div
-                  aria-hidden="true"
-                  className="flex size-24 items-center justify-center rounded-[14px] border border-border bg-[#F4ECE1] text-[#CBB89F]"
-                >
-                  <svg
-                    width="26"
-                    height="26"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              <div className="flex flex-wrap gap-3">
+                {photos.map((photo, index) => (
+                  <div
+                    key={photo.previewUrl}
+                    className="relative size-24 overflow-hidden rounded-[14px] border border-border"
                   >
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21" />
-                  </svg>
-                </div>
-                <div className="flex size-24 flex-col items-center justify-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed border-[#DBCDBA] bg-[#F4ECE1] text-[#B0A290]">
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#C5503A"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  <span className="text-xs">Agregar</span>
-                </div>
+                    <img
+                      src={photo.previewUrl}
+                      alt={`Foto ${index + 1}`}
+                      className="size-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(index)}
+                      aria-label={`Eliminar foto ${index + 1}`}
+                      className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                {photos.length < MAX_PHOTOS && (
+                  <div className="flex size-24 flex-col items-center justify-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed border-[#DBCDBA] bg-[#F4ECE1] text-[#B0A290]">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_MIME_TYPES}
+                      multiple
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex size-full flex-col items-center justify-center gap-1.5"
+                    >
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#C5503A"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      <span className="text-xs">Agregar</span>
+                    </button>
+                  </div>
+                )}
               </div>
+              {formError && (
+                <p
+                  role="alert"
+                  className="mt-2 text-sm font-bold text-[#D9583C]"
+                >
+                  {formError}
+                </p>
+              )}
             </section>
           </div>
         </form>
