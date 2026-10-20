@@ -54,7 +54,7 @@ export function LoginForm() {
             aria-invalid={Boolean(emailError)}
             aria-describedby={emailError ? "email-error" : undefined}
             onChange={() => handleFieldChange("email")}
-            className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px] text-[15px] text-foreground placeholder:text-[#B6A99B] focus:outline-none"
+            className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px] text-[15px] text-foreground placeholder:text-[#B6A99B] focus:outline-none focus:ring-2 focus:ring-foreground"
           />
           {emailError && (
             <p id="email-error" className="mt-1 text-sm text-[#C5503A]">
@@ -79,7 +79,7 @@ export function LoginForm() {
             aria-invalid={Boolean(passwordError)}
             aria-describedby={passwordError ? "password-error" : undefined}
             onChange={() => handleFieldChange("password")}
-            className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px] text-[15px] text-foreground placeholder:text-[#B6A99B] focus:outline-none"
+            className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px] text-[15px] text-foreground placeholder:text-[#B6A99B] focus:outline-none focus:ring-2 focus:ring-foreground"
           />
           {passwordError && (
             <p id="password-error" className="mt-1 text-sm text-[#C5503A]">
@@ -89,7 +89,10 @@ export function LoginForm() {
         </div>
 
         <div className="mb-5 text-right">
-          <Link href="#" className="text-[13.5px] font-bold text-[#C5503A]">
+          <Link
+            href="#"
+            className="inline-flex min-h-6 items-center text-[13.5px] font-bold text-[#C5503A]"
+          >
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
