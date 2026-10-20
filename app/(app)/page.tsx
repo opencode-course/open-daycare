@@ -3,6 +3,7 @@ import { posts, room } from "@/features/feed/data";
 import { CreatePostDialog } from "@/features/feed/components/CreatePostDialog";
 import { PostCard } from "@/features/feed/components/PostCard";
 import { requireUser } from "@/server/auth/session";
+import { getKids } from "@/features/kids/data";
 import { Counter } from "@/components/ui/Counter";
 
 export const instant = false;
@@ -10,7 +11,10 @@ export const instant = false;
 export default async function Home() {
   await connection();
 
-  const user = await requireUser();
+  const [user, kids] = await Promise.all([
+    requireUser(),
+    getKids(),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-5 pb-20 pt-[34px] sm:px-10">
@@ -26,7 +30,7 @@ export default async function Home() {
 
       <Counter />
 
-      <CreatePostDialog name={user.fullName} initials={user.initials} />
+      <CreatePostDialog name={user.fullName} initials={user.initials} kids={kids} />
 
       <div className="mb-[14px] flex items-center gap-[14px]">
         <span className="text-[12.5px] font-extrabold tracking-[0.8px] text-[#8a7c6d]">
