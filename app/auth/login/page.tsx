@@ -53,7 +53,7 @@ export default function LoginPage() {
         </div>
 
         <p className="relative m-0 text-sm text-white/[0.9]">
-          🌿 Guardería Sala Soles
+          <span aria-hidden="true">🌿 </span>Guardería Sala Soles
         </p>
       </section>
 

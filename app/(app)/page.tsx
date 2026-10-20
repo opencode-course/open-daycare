@@ -3,6 +3,7 @@ import { posts, room } from "@/features/feed/data";
 import { CreatePostDialog } from "@/features/feed/components/CreatePostDialog";
 import { PostCard } from "@/features/feed/components/PostCard";
 import { requireUser } from "@/server/auth/session";
+import { Counter } from "@/components/ui/Counter";
 
 export const instant = false;
 
@@ -22,6 +23,8 @@ export default async function Home() {
         </h1>
         <p className="mt-[5px] text-[14.5px] text-muted">{room.meta}</p>
       </header>
+
+      <Counter />
 
       <CreatePostDialog name={user.fullName} initials={user.initials} />
 
