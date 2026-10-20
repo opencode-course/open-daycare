@@ -1,6 +1,6 @@
 # SPEC 12 — Publicación persistente con imágenes
 
-> **Estado:** Approved
+> **Estado:** Done
 > **Depende de:** SPEC 06, SPEC 10
 > **Fecha:** 2026-10-20
 > **Objetivo:** Conectar el diálogo de crear publicación (SPEC 06) con persistencia real en Supabase — tablas `posts`, `post_children`, `post_photos` —, habilitar la suba de hasta 3 imágenes por publicación al bucket público `posts`, y hacer `revalidatePath` para que el feed refrezque.

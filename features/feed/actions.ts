@@ -142,7 +142,7 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
           throw new Error("children_insert_failed");
         }
       }
-    } catch (innerError) {
+    } catch {
       await rollbackPost(supabase, postId, uploadedPaths);
       return { success: false, error: GENERIC_ERROR };
     }
