@@ -22,12 +22,11 @@ export type Post = {
   type: PostType;
   authorId: string;
   author: string;
-  avatarInitials?: string;
-  avatarTone: "child" | "announcement";
+  avatarInitials: string;
+  avatarTone: "child" | "staff";
   time: string;
   audience: string;
   text: string;
-  photoLabel?: string;
   photos: PostPhoto[];
   hearts: number;
   comments: number;
@@ -120,7 +119,69 @@ type DbPostRow = {
   }>;
 };
 
-export async function getPosts(): Promise<DbPostRow[]> {
+function getInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 0 || !parts[0]) return "?";
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function formatTime(publishedAt: string): string {
+  const date = new Date(publishedAt);
+  const now = new Date();
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) {
+    return `${hours}:${minutes}`;
+  }
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  return `${day}/${month} ${hours}:${minutes}`;
+}
+
+function buildAudience(children: { id: string; full_name: string }[]): string {
+  if (children.length === 0) return "Para: toda la sala";
+  const names = children.map((c) => c.full_name).join(", ");
+  return `Para: familia de ${names}`;
+}
+
+function mapDbRowToPost(row: DbPostRow): Post {
+  const authorName = row.users?.full_name ?? "Desconocido";
+  const children = row.post_children
+    .map((pc) => pc.children)
+    .filter((c): c is { id: string; full_name: string } => c !== null);
+
+  return {
+    id: row.id,
+    type: row.type,
+    authorId: row.users?.id ?? "",
+    author: authorName,
+    avatarInitials: getInitials(authorName),
+    avatarTone: children.length > 0 ? "child" : "staff",
+    time: formatTime(row.published_at),
+    audience: buildAudience(children),
+    text: row.body,
+    photos: row.post_photos.map((p) => ({
+      id: p.id,
+      url: p.url,
+      width: p.width ?? undefined,
+      height: p.height ?? undefined,
+      position: p.position,
+    })),
+    hearts: 0,
+    comments: 0,
+  };
+}
+
+export async function getPosts(): Promise<Post[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -153,7 +214,7 @@ export async function getPosts(): Promise<DbPostRow[]> {
   );
 
   if (photoPaths.length === 0) {
-    return posts;
+    return posts.map(mapDbRowToPost);
   }
 
   const { data: signedUrlsData, error: signedUrlsError } = await supabase.storage
@@ -168,12 +229,14 @@ export async function getPosts(): Promise<DbPostRow[]> {
     signedUrlsData.map((item) => [item.path, item.signedUrl]),
   );
 
-  return posts.map((post) => ({
+  const postsWithSignedUrls = posts.map((post) => ({
     ...post,
     post_photos: post.post_photos.map((photo) => ({
       ...photo,
       url: signedUrlMap.get(photo.url) ?? photo.url,
     })),
   }));
+
+  return postsWithSignedUrls.map(mapDbRowToPost);
 }
 
