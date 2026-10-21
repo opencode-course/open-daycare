@@ -30,7 +30,11 @@ export default async function Home() {
 
       <Counter />
 
-      <CreatePostDialog name={user.fullName} initials={user.initials} kids={kids} />
+      <CreatePostDialog
+        name={user.fullName}
+        initials={user.initials}
+        kids={kids}
+      />
 
       <section className="flex flex-col gap-4" aria-label="Publicaciones">
         {posts.length === 0 ? (
@@ -38,9 +42,7 @@ export default async function Home() {
             <p className="text-lg text-muted">No hay publicaciones aún</p>
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
+          posts.map((post) => <PostCard key={post.id} post={post} />)
         )}
       </section>
     </div>
