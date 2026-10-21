@@ -1,6 +1,6 @@
 # SPEC 13 — Feed real desde DB
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 12 (crear-publicacion-persistente)
 > **Fecha:** 2026-10-20
 > **Objetivo:** Reemplazar los datos mock del feed con una query real a Supabase que cargue todos los posts persistidos, incluyendo fotos, children y author, con signed URLs y formateo de tiempo en el servidor.
@@ -130,36 +130,36 @@ function mapDbRowToPost(row: DbPostRow): Post {
 
 ## Acceptance criteria
 
-- [ ] La ruta `/` llama a `getPosts()` y muestra posts reales desde la DB.
-- [ ] Los posts se ordenan por `published_at DESC` (más recientes primero).
-- [ ] Se muestran máximo 100 posts (`LIMIT 100`).
-- [ ] El nombre completo del autor se muestra (JOIN con `users`).
-- [ ] Las iniciales del autor se calculan correctamente (primera letra de nombre + apellido).
-- [ ] Las fotos se cargan desde `post_photos` con signed URLs generadas en batch.
-- [ ] `PostCard` muestra fotos en grid cuando el post tiene fotos.
-- [ ] El audience muestra "Para: familia de [nombres]" si tiene children, "Para: toda la sala" si no.
-- [ ] Los nombres de children se muestran separados por coma.
-- [ ] El tiempo se formatea en el servidor: "HH:mm" si es hoy, "DD/MM HH:mm" si es otro día.
-- [ ] `avatarTone` es `"child"` si el post tiene children, `"staff"` si no.
-- [ ] `hearts` y `comments` se muestran como `0`.
-- [ ] Los badges de tipo de post usan `postTypeLabels` para mostrar texto en español.
-- [ ] El array mock `posts` se elimina de `features/feed/data.ts`.
-- [ ] Se muestra skeleton de 3 post cards mientras cargan los posts (Suspense fallback).
-- [ ] Se muestra mensaje "No hay publicaciones aún" cuando no hay posts.
-- [ ] Se muestra mensaje de error con botón retry cuando la query falla.
-- [ ] El botón retry recarga la página completa (`window.location.reload()`).
-- [ ] Después de crear un post con `createPost`, el feed se actualiza automáticamente (vía `revalidatePath`).
-- [ ] No se muestra info de sala en el feed.
-- [ ] Se insertan 3-5 posts de prueba en la DB para verificación.
-- [ ] `npm run lint` y `npm run build` terminan correctamente.
+- [x] La ruta `/` llama a `getPosts()` y muestra posts reales desde la DB.
+- [x] Los posts se ordenan por `published_at DESC` (más recientes primero).
+- [x] Se muestran máximo 100 posts (`LIMIT 100`).
+- [x] El nombre completo del autor se muestra (JOIN con `users`).
+- [x] Las iniciales del autor se calculan correctamente (primera letra de nombre + apellido).
+- [x] Las fotos se cargan desde `post_photos` con signed URLs generadas en batch.
+- [x] `PostCard` muestra fotos en grid cuando el post tiene fotos.
+- [x] El audience muestra "Para: familia de [nombres]" si tiene children, "Para: toda la sala" si no.
+- [x] Los nombres de children se muestran separados por coma.
+- [x] El tiempo se formatea en el servidor: "HH:mm" si es hoy, "DD/MM HH:mm" si es otro día.
+- [x] `avatarTone` es `"child"` si el post tiene children, `"staff"` si no.
+- [x] `hearts` y `comments` se muestran como `0`.
+- [x] Los badges de tipo de post usan `postTypeLabels` para mostrar texto en español.
+- [x] El array mock `posts` se elimina de `features/feed/data.ts`.
+- [x] Se muestra skeleton de 3 post cards mientras cargan los posts (Suspense fallback).
+- [x] Se muestra mensaje "No hay publicaciones aún" cuando no hay posts.
+- [x] Se muestra mensaje de error con botón retry cuando la query falla.
+- [x] El botón retry recarga la página completa (`window.location.reload()`).
+- [x] Después de crear un post con `createPost`, el feed se actualiza automáticamente (vía `revalidatePath`).
+- [x] No se muestra info de sala en el feed.
+- [x] Se insertan 3-5 posts de prueba en la DB para verificación.
+- [x] `npm run lint` y `npm run build` terminan correctamente.
 - [ ] La consola del navegador no muestra errores al cargar `/`.
 
 ## Decisions
 
-- **Sí:** función `getPosts()` en `features/feed/data.ts` reemplaza el array mock.
+- **Sí:** función `getPosts()` reemplaza el array mock. **Nota:** se movió a `features/feed/get-posts.ts` (archivo separado) para evitar conflictos con Client Components que importan tipos desde `data.ts`.
 - **Sí:** una sola query con múltiples JOINs (posts + users + post_photos + post_children + children).
 - **Sí:** generar signed URLs en batch desde el servidor (no URLs públicas).
-- **Sí:** mapeo de filas de DB a tipo `Post` en `data.ts` (función interna `mapDbRowToPost`).
+- **Sí:** mapeo de filas de DB a tipo `Post` en `get-posts.ts` (función interna `mapDbRowToPost`).
 - **Sí:** formato de tiempo en el servidor: "HH:mm" si es hoy, "DD/MM HH:mm" si es otro día.
 - **Sí:** calcular `avatarInitials` desde el nombre completo (primera letra de nombre + apellido).
 - **Sí:** `avatarTone` basado en si el post tiene `post_children`: `"child"` si tiene, `"staff"` si no.

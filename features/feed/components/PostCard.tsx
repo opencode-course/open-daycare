@@ -28,28 +28,13 @@ export function PostCard({ post }: { post: Post }) {
       <header className="mb-[14px] flex items-center gap-3">
         <span
           className={`flex size-11 shrink-0 items-center justify-center rounded-full font-heading text-[17px] font-semibold ${
-            post.avatarTone === "announcement"
-              ? "bg-[#ccd8f4] text-[#4e72c8]"
-              : "bg-[#a9d9e8] text-[#1f7a93]"
+            post.avatarTone === "staff"
+              ? "bg-[#a9d9e8] text-[#1f7a93]"
+              : "bg-[#cfebd8] text-[#3e9b6c]"
           }`}
           aria-hidden="true"
         >
-          {post.avatarTone === "announcement" ? (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m3 11 18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6" />
-            </svg>
-          ) : (
-            post.avatarInitials
-          )}
+          {post.avatarInitials}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -81,29 +66,21 @@ export function PostCard({ post }: { post: Post }) {
         {post.text}
       </p>
 
-      {post.photoLabel && (
-        <a
-          href="#"
-          aria-label={post.photoLabel}
-          className="mt-[14px] flex h-[200px] flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-[#dbcdba] bg-[#f4ece1] text-[#b0a290]"
+      {post.photos.length > 0 && (
+        <div
+          className={`mt-[14px] grid gap-2 ${
+            post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}
         >
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="9" cy="9" r="2" />
-            <path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21" />
-          </svg>
-          <span className="text-[13.5px]">{post.photoLabel}</span>
-        </a>
+          {post.photos.map((photo) => (
+            <img
+              key={photo.id}
+              src={photo.url}
+              alt=""
+              className="aspect-square w-full rounded-2xl object-cover"
+            />
+          ))}
+        </div>
       )}
 
       <footer className="mt-4 flex items-center gap-[18px] border-t border-[#f0e6d8] pt-[14px]">
