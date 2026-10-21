@@ -145,6 +145,35 @@ export async function getPosts(): Promise<DbPostRow[]> {
     throw error;
   }
 
-  return data ?? [];
+  const posts = data ?? [];
+
+  // Generar signed URLs para todas las fotos en batch
+  const photoPaths = posts.flatMap((post) =>
+    post.post_photos.map((photo) => photo.url),
+  );
+
+  if (photoPaths.length === 0) {
+    return posts;
+  }
+
+  const { data: signedUrlsData, error: signedUrlsError } = await supabase.storage
+    .from("posts")
+    .createSignedUrls(photoPaths, 60 * 60); // 1 hora
+
+  if (signedUrlsError) {
+    throw signedUrlsError;
+  }
+
+  const signedUrlMap = new Map(
+    signedUrlsData.map((item) => [item.path, item.signedUrl]),
+  );
+
+  return posts.map((post) => ({
+    ...post,
+    post_photos: post.post_photos.map((photo) => ({
+      ...photo,
+      url: signedUrlMap.get(photo.url) ?? photo.url,
+    })),
+  }));
 }
 
