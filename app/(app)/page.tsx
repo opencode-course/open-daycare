@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import { posts, room } from "@/features/feed/data";
+import { getPosts } from "@/features/feed/get-posts";
 import { CreatePostDialog } from "@/features/feed/components/CreatePostDialog";
 import { PostCard } from "@/features/feed/components/PostCard";
 import { requireUser } from "@/server/auth/session";
@@ -11,9 +11,10 @@ export const instant = false;
 export default async function Home() {
   await connection();
 
-  const [user, kids] = await Promise.all([
+  const [user, kids, posts] = await Promise.all([
     requireUser(),
     getKids(),
+    getPosts(),
   ]);
 
   return (
@@ -25,24 +26,24 @@ export default async function Home() {
         <h1 className="m-0 font-heading text-[30px] font-semibold leading-tight text-foreground">
           Buenas, {user.firstName}
         </h1>
-        <p className="mt-[5px] text-[14.5px] text-muted">{room.meta}</p>
       </header>
 
       <Counter />
 
-      <CreatePostDialog name={user.fullName} initials={user.initials} kids={kids} />
+      <CreatePostDialog
+        name={user.fullName}
+        initials={user.initials}
+        kids={kids}
+      />
 
-      <div className="mb-[14px] flex items-center gap-[14px]">
-        <span className="text-[12.5px] font-extrabold tracking-[0.8px] text-[#8a7c6d]">
-          PUBLICADO HOY
-        </span>
-        <span className="h-px flex-1 bg-[#e7dac8]" />
-      </div>
-
-      <section className="flex flex-col gap-4" aria-label="Publicaciones de hoy">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+      <section className="flex flex-col gap-4" aria-label="Publicaciones">
+        {posts.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-lg text-muted">No hay publicaciones aún</p>
+          </div>
+        ) : (
+          posts.map((post) => <PostCard key={post.id} post={post} />)
+        )}
       </section>
     </div>
   );
