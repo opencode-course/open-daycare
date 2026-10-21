@@ -1,3 +1,5 @@
+import { createClient } from "@/server/db/client";
+
 export type PostType =
   | "achievement"
   | "activity"
@@ -99,3 +101,50 @@ export const postTypeChipLabels: Record<PostType, string> = {
   photo: "Foto",
   announcement: "Anuncio",
 };
+
+type DbPostRow = {
+  id: string;
+  type: PostType;
+  body: string;
+  published_at: string;
+  users: { id: string; full_name: string } | null;
+  post_photos: Array<{
+    id: string;
+    url: string;
+    width: number | null;
+    height: number | null;
+    position: number;
+  }>;
+  post_children: Array<{
+    children: { id: string; full_name: string } | null;
+  }>;
+};
+
+export async function getPosts(): Promise<DbPostRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+      id,
+      type,
+      body,
+      published_at,
+      users(id, full_name),
+      post_photos(id, url, width, height, position),
+      post_children(
+        children(id, full_name)
+      )
+    `,
+    )
+    .order("published_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+
